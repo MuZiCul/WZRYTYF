@@ -19,6 +19,8 @@ HEADERS = {
 
 def request_(params, cookies, data):
     qq = cookies['ied_qq'][1:]
+    if qq[0]=='0':
+        qq = qq[1:]
     today = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     try:
         response = requests.post('https://smoba.ams.game.qq.com/ams/ame/amesvr', params=params, cookies=cookies,
@@ -44,5 +46,6 @@ def check_cookies(params, cookies, data):
     if result != 0:
         if '请先登录' in result:
             send_to_wecom(qq + '的cookies已过期，请及时更新！\n当前时间：' + today)
-
+        else:
+            send_to_wecom(qq + '的cookies正常！\n当前时间：' + today)
 
