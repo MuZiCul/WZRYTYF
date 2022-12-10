@@ -1,38 +1,41 @@
 from flask import Flask
 from flask_apscheduler import APScheduler
 
-from blueprints.exchange import SkinDebris, check_cookies
-from config.config import cookies1, params1, data1, cookies, params, data, cookies0, params0, data0
+from blueprints.exchange import SkinDebris, Reset
 from utils.utils import send_to_wecom
+from blueprints import index_bp
+from config.exts import db
+from flask_migrate import Migrate
+import config.config as config
 
 app = Flask(__name__)
 app.config['SCHEDULER_TIMEZONE'] = 'Asia/Shanghai'
+
+app.config.from_object(config)
+db.init_app(app)
+migrate = Migrate(app, db)
+
+
+app.register_blueprint(index_bp)
 scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
 
 
-@app.route('/')
-def hello_world():  # put application's code here
-    return 'Hello World!'
-
-
-@scheduler.task('cron', id='QQ', hour=1)
-def SkinDebris_():
+@scheduler.task('cron', id='Reset', hour=0)
+def Reset_():
     try:
-        SkinDebris(params, cookies, data)
-        SkinDebris(params1, cookies1, data1)
-        SkinDebris(params0, cookies0, data0)
+        with scheduler.app.app_context():
+            Reset()
     except Exception as e:
         send_to_wecom('体验服服务器异常，请检查！\n错误详情：'+ str(e))
 
 
-@scheduler.task('interval', id='QQ_G', minutes=30)
-def check_cookies_():
+@scheduler.task('interval', id='SkinDebris', minutes=30)
+def SkinDebris_():
     try:
-        check_cookies(params, cookies, data)
-        check_cookies(params1, cookies1, data1)
-        check_cookies(params0, cookies0, data0)
+        with scheduler.app.app_context():
+            SkinDebris()
     except Exception as e:
         send_to_wecom('体验服服务器异常，请检查！\n错误详情：'+ str(e))
 
