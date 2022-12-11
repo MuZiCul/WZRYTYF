@@ -54,6 +54,11 @@ def curl2py(curl_result_list):
             qq = qq_result_list[0][1:]
             if qq[0] == '0':
                 qq = qq[1:]
+            # 解析wx
+            wx_re_expression = re.compile("wxcode=(.*?);", re.S)
+            wx_result_list = re.findall(wx_re_expression, curl_result)
+            if len(wx_result_list)>0:
+                qq = wx_result_list[0]
             # 解析出请求Url
             url_re_expression = re.compile("(http.*?)'", re.S)
             url_result_list = re.findall(url_re_expression, curl_result)
@@ -89,6 +94,9 @@ def curl2py(curl_result_list):
                     code = 200
                 elif '每天只能兑换一次该奖励' in response_msg:
                     msg = add_cookies(qq, url, headers, data_dict) + '，今日已兑换！'
+                    code = 200
+                elif '体验币不足' in response_msg:
+                    msg = add_cookies(qq, url, headers, data_dict) + '，体验比不足！！'
                     code = 200
                 else:
                     msg = 'Cookies有误，请重新登陆后获取curl！'

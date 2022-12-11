@@ -6,18 +6,6 @@ from config.exts import db
 from config.models import CookiesModel
 from utils.utils import send_to_wecom
 
-HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
-    'Accept': '*/*',
-    'Accept-Language': 'zh-CN,en-US;q=0.7,en;q=0.3',
-    'Origin': 'https://smoba.ams.game.qq.com',
-    'Connection': 'keep-alive',
-    'Referer': 'https://smoba.ams.game.qq.com/ams/postMessage_noflash.html',
-    'Sec-Fetch-Dest': 'empty',
-    'Sec-Fetch-Mode': 'cors',
-    'Sec-Fetch-Site': 'same-origin',
-}
-
 
 def Reset():
     cookies_list = CookiesModel.query.all()
@@ -52,5 +40,10 @@ def SkinDebris():
                 cookies_p.past_due = 1
                 db.session.commit()
                 send_to_wecom(cookies.qq + '的cookies已过期，请及时更新！\n当前时间：' + today)
+            elif '体验币不足' in result:
+                cookies_p = CookiesModel.query.filter_by(qq=cookies.qq).first()
+                cookies_p.convertibility = 0
+                db.session.commit()
+                print(cookies.qq + '的体验币不足！\n当前时间：' + today)
             else:
-                send_to_wecom(cookies.qq + '的cookies正常！\n当前时间：' + today)
+                print(cookies.qq + '的cookies正常！\n当前时间：' + today)

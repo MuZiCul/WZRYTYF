@@ -5,7 +5,7 @@ from datetime import datetime
 class CookiesModel(db.Model):
     __tablename__ = "cookies"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    qq = db.Column(db.String(50), nullable=False, unique=True)
+    qq = db.Column(db.String(100), nullable=False, unique=True)
     url = db.Column(db.String(2000), nullable=False)
     headers = db.Column(db.String(20000), nullable=False)
     data = db.Column(db.String(20000), nullable=False)
