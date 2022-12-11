@@ -20,10 +20,11 @@ def home():
 def get_curl():
     if request.method == 'POST':
         curl = request.form.get('curl')
+        wx = request.form.get('wx')
         curl_re_expression = re.compile("curl(.*?)--compressed", re.S) or re.compile("curl(.*?)--insecure", re.S)
         curl_result_list = re.findall(curl_re_expression, curl)
         if curl_result_list:
-            return curl2py(curl_result_list)
+            return curl2py(curl_result_list, wx)
         else:
             return jsonify({'code': 400, 'msg': 'curl格式有误'})
     else:
@@ -44,7 +45,7 @@ def search():
         return jsonify({'code': 400, 'msg': '系统错误'})
 
 
-def curl2py(curl_result_list):
+def curl2py(curl_result_list, wx):
     try:
         if curl_result_list:
             curl_result = curl_result_list[0]
@@ -54,11 +55,14 @@ def curl2py(curl_result_list):
             qq = qq_result_list[0][1:]
             if qq[0] == '0':
                 qq = qq[1:]
-            # 解析wx
+            # 如果是wx登录，解析wx
             wx_re_expression = re.compile("wxcode=(.*?);", re.S)
             wx_result_list = re.findall(wx_re_expression, curl_result)
             if len(wx_result_list)>0:
-                qq = wx_result_list[0]
+                if wx == '' or wx == ' ' or len(wx)<1:
+                    return jsonify({'code': 400, 'msg': '当前为微信Curl，请输入微信号！'})
+                else:
+                    qq = wx
             # 解析出请求Url
             url_re_expression = re.compile("(http.*?)'", re.S)
             url_result_list = re.findall(url_re_expression, curl_result)
@@ -96,12 +100,11 @@ def curl2py(curl_result_list):
                     msg = add_cookies(qq, url, headers, data_dict) + '，今日已兑换！'
                     code = 200
                 elif '体验币不足' in response_msg:
-                    msg = add_cookies(qq, url, headers, data_dict) + '，体验比不足！！'
+                    msg = add_cookies(qq, url, headers, data_dict) + '，体验币不足！！'
                     code = 200
                 else:
                     msg = 'Cookies有误，请重新登陆后获取curl！'
                     code = 400
-
         else:
             msg = 'curl有误！'
             code = 400
