@@ -32,7 +32,13 @@
     <div class="layui-form-item">
         <label class="layui-form-label">微信号：</label>
         <div class="layui-input-block">
-            <input type="text" name="wx"  placeholder="如果是微信区请在此处填写微信号，QQ区不填" class="layui-input">
+            <input type="text" name="wx"  placeholder="如果是微信区请在此处填写微信号，QQ区不填" maxlength="20" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">备注：</label>
+        <div class="layui-input-block">
+            <input type="text" name="remarks"  placeholder="用来方便以后查询，可不填" maxlength="20" class="layui-input">
         </div>
     </div>
     <div class="layui-form-item">
@@ -50,9 +56,9 @@
 
 <form class="layui-form" action="">
     <div class="layui-form-item">
-        <label class="layui-form-label">QQ/WX号：</label>
+        <label class="layui-form-label">QQ号/WX号/备注：</label>
         <div class="layui-input-block">
-            <input type="text" name="qq" lay-verify="required" lay-reqtext="QQ是必填项，岂能为空？" placeholder="请输入要查询的QQ号或微信号" class="layui-input">
+            <input type="text" name="keyword" lay-verify="required" lay-reqtext="请输入查询关键字！" maxlength="20" placeholder="请输入要查询的QQ号或微信号或备注" class="layui-input">
         </div>
     </div>
     <div class="layui-form-item">
@@ -104,7 +110,7 @@
             const curl_data = data.field
             $.ajax({
                 url: '/curl', method: 'post', data: {
-                    'curl': curl_data.curl, 'wx': curl_data.curl
+                    'curl': curl_data.curl, 'wx': curl_data.curl, 'remarks':curl_data.remarks
                 }, success: function (data) {
                     if (400 === data.code) {
                         layer.alert(data.msg, {
@@ -128,7 +134,7 @@
             const qq_data = data.field
             $.ajax({
                 url: '/search', method: 'post', data: {
-                    'qq': qq_data.qq
+                    'keyword': qq_data.keyword
                 }, success: function (data) {
                     if (200 === data.code) {
                         let msg = '';

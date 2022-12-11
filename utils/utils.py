@@ -38,3 +38,17 @@ def send_to_wecom(msg):
         return response
     else:
         return 0
+
+
+def IsNull(obj):
+    if obj is None or len(obj)<1 or obj == '' or obj == ' ':
+        return True
+    else:
+        return False
+
+
+def IsNotNull(obj):
+    if obj is None or len(obj)<1 or obj == '' or obj == ' ':
+        return False
+    else:
+        return True
