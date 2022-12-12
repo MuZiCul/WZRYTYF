@@ -48,13 +48,7 @@ def IsNull(obj):
 
 
 def IsNotNull(obj):
-    if obj is None:
-        return False
-    elif len(obj)<1:
-        return False
-    elif obj == '':
-        return False
-    elif obj == ' ':
+    if obj is None or len(obj)<1 or obj == '' or obj == ' ':
         return False
     else:
         return True

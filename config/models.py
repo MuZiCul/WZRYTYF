@@ -19,6 +19,6 @@ class CookiesLogModel(db.Model):
     __tablename__ = "cookies_log"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     qq = db.Column(db.String(100), nullable=False)
-    remarks = db.Column(db.String(100), unique=True)
+    remarks = db.Column(db.String(100))
     states = db.Column(db.Integer, nullable=False)
     create_date = db.Column(db.DateTime, default=datetime.now)

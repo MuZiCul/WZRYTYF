@@ -114,7 +114,7 @@
             const curl_data = data.field
             $.ajax({
                 url: '/curl', method: 'post', data: {
-                    'curl': curl_data.curl, 'wx': curl_data.curl, 'remarks': curl_data.remarks
+                    'curl': curl_data.curl, 'wx': curl_data.wx, 'remarks': curl_data.remarks
                 }, success: function (data) {
                     if (400 === data.code) {
                         layer.alert(data.msg, {

@@ -48,6 +48,15 @@ def search():
         return render_template('index.html')
 
 
+@bp.route('/search_all', methods=['GET', 'POST'])
+def search_all():
+    if request.method == 'GET':
+        keyword = request.args.get('keyword')
+        return render_template('search_All.html', keyword=keyword)
+    else:
+        return render_template('index.html')
+
+
 @bp.route('/search_key', methods=['GET', 'POST'])
 def search_key():
     if request.method == 'POST':
@@ -83,7 +92,7 @@ def curl2py(curl_result_list, wx, remarks):
                     qq = wx
             if IsNotNull(remarks):
                 cookies_remarks = CookiesModel.query.filter_by(remarks=remarks).first()
-                if IsNotNull(cookies_remarks) and cookies_remarks.qq != qq:
+                if cookies_remarks and cookies_remarks.qq != qq:
                     return jsonify({'code': 400, 'msg': '当前备注已被占用！'})
             # 解析出请求Url
             url_re_expression = re.compile("(http.*?)'", re.S)
@@ -141,7 +150,7 @@ def add_cookies(qq, url, headers, data_dict, remarks):
     headers_data = str(headers)
     data_data = str(data_dict)
     cookies = CookiesModel.query.filter_by(qq=qq).first()
-    if IsNull(cookies):
+    if not cookies:
         cookies_model = CookiesModel(qq=qq, url=url, headers=headers_data, data=data_data, remarks=remarks)
         db.session.add(cookies_model)
         db.session.commit()
@@ -186,10 +195,26 @@ def test():
 
 
 @bp.route('/search_data', methods=['GET', 'POST'])
-def ssss():
+def search_data():
     keyword = request.args.get('keyword')
     result = CookiesLogModel.query.filter_by(qq=keyword).order_by(db.text('-create_date')).all()
     result = result if IsNotNull(result) else CookiesLogModel.query.filter_by(remarks=keyword).order_by(db.text('-create_date')).all()
+    data_list = []
+    for i in result:
+        dit = {'id': i.id, 'qq': i.qq, 'remarks': i.remarks, 'states': i.states,
+               'create_date': str(i.create_date) if i.create_date else '暂无信息', }
+        data_list.append(dit)
+    dic = {'code': 0, 'msg': 'SUCCESS', 'count': len(result), 'data': data_list}
+    return json.dumps(dic, ensure_ascii=False)
+
+
+@bp.route('/search_all_data', methods=['GET', 'POST'])
+def search_all_data():
+    keyword = request.args.get('keyword')
+    if keyword != 'All':
+        dic = {'code': 0, 'msg': 'SUCCESS', 'count': 0, 'data': []}
+        return json.dumps(dic, ensure_ascii=False)
+    result = CookiesLogModel.query.order_by(db.text('-create_date')).all()
     data_list = []
     for i in result:
         dit = {'id': i.id, 'qq': i.qq, 'remarks': i.remarks, 'states': i.states,
