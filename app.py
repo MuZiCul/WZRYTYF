@@ -27,7 +27,7 @@ def favicon():
     return redirect(url_for('static', filename='images/logo.ico'))
 
 
-@scheduler.task('interval', id='SkinDebris', minutes=30)
+@scheduler.task('interval', id='SkinDebris', minutes=1)
 def SkinDebris_():
     try:
         with scheduler.app.app_context():

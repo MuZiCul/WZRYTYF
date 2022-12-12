@@ -159,17 +159,25 @@ def add_cookies(qq, url, headers, data_dict, remarks):
 
 def updateCookiesLog(qq, remarks, states):
     if states == COOKIES_STATE_OVERDUE:
-        cookies = CookiesLogModel.query.filter(
+        cookies_OVERDUE = CookiesLogModel.query.filter(
             and_(CookiesLogModel.qq == qq, CookiesLogModel.states == COOKIES_STATE_OVERDUE,
                  db.cast(CookiesLogModel.create_date, db.DATE) == db.cast(datetime.now(), db.DATE))).all()
-        if IsNull(cookies):
-            cookies_log_model = CookiesLogModel(qq=qq, remarks=remarks, states=states)
-            db.session.add(cookies_log_model)
-            db.session.commit()
+        if not cookies_OVERDUE:
+            updateCookiesLog_(qq, remarks, states)
+    elif states == COOKIES_STATE_DEFICIT:
+        cookies_DEFICIT = CookiesLogModel.query.filter(
+            and_(CookiesLogModel.qq == qq, CookiesLogModel.states == COOKIES_STATE_DEFICIT,
+                 db.cast(CookiesLogModel.create_date, db.DATE) == db.cast(datetime.now(), db.DATE))).all()
+        if not cookies_DEFICIT:
+            updateCookiesLog_(qq, remarks, states)
     else:
-        cookies_log_model = CookiesLogModel(qq=qq, remarks=remarks, states=states)
-        db.session.add(cookies_log_model)
-        db.session.commit()
+        updateCookiesLog_(qq, remarks, states)
+
+
+def updateCookiesLog_(qq, remarks, states):
+    cookies_log_model = CookiesLogModel(qq=qq, remarks=remarks, states=states)
+    db.session.add(cookies_log_model)
+    db.session.commit()
 
 
 @bp.route('/test', methods=['GET', 'POST'])
