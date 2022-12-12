@@ -1,7 +1,7 @@
 from flask import Flask, redirect, url_for
 from flask_apscheduler import APScheduler
 
-from blueprints.exchange import SkinDebris, Reset
+from blueprints.exchange import SkinDebris
 from utils.utils import send_to_wecom
 from blueprints import index_bp
 from config.exts import db
@@ -27,16 +27,7 @@ def favicon():
     return redirect(url_for('static', filename='images/logo.ico'))
 
 
-@scheduler.task('cron', id='Reset', hour=0)
-def Reset_():
-    try:
-        with scheduler.app.app_context():
-            Reset()
-    except Exception as e:
-        send_to_wecom('体验服服务器异常，请检查！\n错误详情：'+ str(e))
-
-
-@scheduler.task('interval', id='SkinDebris', minutes=1)
+@scheduler.task('interval', id='SkinDebris', minutes=30)
 def SkinDebris_():
     try:
         with scheduler.app.app_context():

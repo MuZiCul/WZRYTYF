@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
     <link rel="stylesheet" href="../static/layui/css/layui.css" tppabs="http://layui/dist/css/layui.css" media="all">
+    <script type="text/javascript" src="{{ url_for('static',filename='js/common.js') }}" defer="defer"></script>
 </head>
 <body>
 
@@ -32,13 +33,13 @@
     <div class="layui-form-item">
         <label class="layui-form-label">微信号：</label>
         <div class="layui-input-block">
-            <input type="text" name="wx"  placeholder="如果是微信区请在此处填写微信号，QQ区不填" maxlength="20" class="layui-input">
+            <input type="text" name="wx" placeholder="如果是微信区请在此处填写微信号，QQ区不填" maxlength="20" class="layui-input">
         </div>
     </div>
     <div class="layui-form-item">
         <label class="layui-form-label">备注：</label>
         <div class="layui-input-block">
-            <input type="text" name="remarks"  placeholder="用来方便以后查询，可不填" maxlength="20" class="layui-input">
+            <input type="text" name="remarks" placeholder="用来方便以后查询，可不填" maxlength="20" class="layui-input">
         </div>
     </div>
     <div class="layui-form-item">
@@ -54,16 +55,17 @@
     <legend>Cookies状态查询</legend>
 </fieldset>
 
-<form class="layui-form" action="">
+<form class="layui-form" action="/search" onsubmit="return CheckKeyword('search')">
     <div class="layui-form-item">
         <label class="layui-form-label">QQ号/WX号/备注：</label>
         <div class="layui-input-block">
-            <input type="text" name="keyword" lay-verify="required" lay-reqtext="请输入查询关键字！" maxlength="20" placeholder="请输入要查询的QQ号或微信号或备注" class="layui-input">
+            <input type="text" id="search_keyword" name="keyword" lay-verify="required" lay-reqtext="请输入查询关键字！" maxlength="20"
+                   placeholder="请输入要查询的QQ号或微信号或备注" class="layui-input">
         </div>
     </div>
     <div class="layui-form-item">
         <div class="layui-input-block">
-            <button type="submit" class="layui-btn" lay-submit="" lay-filter="search">查询</button>
+            <button type="submit" class="layui-btn" >查询</button>
             <button type="reset" class="layui-btn layui-btn-primary">重置</button>
         </div>
     </div>
@@ -71,46 +73,48 @@
 
 
 <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
-  <legend><b>注意事项：</b></legend>
+    <legend><b>注意事项：</b></legend>
 </fieldset>
 
 <fieldset class="layui-elem-field">
-  <legend style="color: red">教程</legend>
-  <div class="layui-field-box">
-    体验服自动兑换奖励教程：https://www.aliyundrive.com/s/kEWyjJ6JALB，<a href="https://www.aliyundrive.com/s/kEWyjJ6JALB" target="_blank" style="color: blue;">点我跳转</a>
-  </div>
+    <legend style="color: red">教程</legend>
+    <div class="layui-field-box">
+        体验服自动兑换奖励教程：https://www.aliyundrive.com/s/kEWyjJ6JALB，<a href="https://www.aliyundrive.com/s/kEWyjJ6JALB"
+                                                                 target="_blank" style="color: blue;">点我跳转</a>
+    </div>
 </fieldset>
 <fieldset class="layui-elem-field">
-  <legend>疑问</legend>
-  <div class="layui-field-box">
-    有些人可能并不是每天都有碎片，第一可能是你的Curl已过期，需要重新提交，可以在上面查询；第二兑换取决于你的“体验币”，体验服官网可以查询。获取体验币的方法是，在体验服打排位或者每次更新的时候更新体验服并登录，邮箱中会发放体验币。
-  </div>
+    <legend>疑问</legend>
+    <div class="layui-field-box">
+        有些人可能并不是每天都有碎片，第一可能是你的Curl已过期，需要重新提交，可以在上面查询；第二兑换取决于你的“体验币”，体验服官网可以查询。获取体验币的方法是，在体验服打排位或者每次更新的时候更新体验服并登录，邮箱中会发放体验币。
+    </div>
 </fieldset>
 <fieldset class="layui-elem-field">
-  <legend>官方规则</legend>
-  <div class="layui-field-box">
-      每80个体验币=2个皮肤/英雄碎片，体验币不足则无法正常兑换！
-  </div>
+    <legend>官方规则</legend>
+    <div class="layui-field-box">
+        每80个体验币=2个皮肤/英雄碎片，体验币不足则无法正常兑换！
+    </div>
 </fieldset>
 <fieldset class="layui-elem-field">
-  <legend>体验服官网</legend>
-  <div class="layui-field-box">
-      官网：https://pvp.qq.com/cp/a20161115tyf/index.shtml，<a href="https://pvp.qq.com/cp/a20161115tyf/index.shtml" target="_blank" style="color: blue;">点我跳转</a>，没有号的请先去申请，注意申请条件！
-  </div>
+    <legend>体验服官网</legend>
+    <div class="layui-field-box">
+        官网：https://pvp.qq.com/cp/a20161115tyf/index.shtml，<a href="https://pvp.qq.com/cp/a20161115tyf/index.shtml"
+                                                             target="_blank" style="color: blue;">点我跳转</a>，没有号的请先去申请，注意申请条件！
+    </div>
 </fieldset>
 
 <script src="../static/layui/layui.js" charset="utf-8"></script>
 <!-- 注意：如果你直接复制所有代码到本地，上述 JS 路径需要改成你本地的 -->
 <script>
     layui.use(['form', 'layedit', 'laydate'], function () {
-        var form = layui.form
-            , layer = layui.layer
+        const form = layui.form
+            , layer = layui.layer;
         //监听提交
         form.on('submit(add)', function (data) {
             const curl_data = data.field
             $.ajax({
                 url: '/curl', method: 'post', data: {
-                    'curl': curl_data.curl, 'wx': curl_data.curl, 'remarks':curl_data.remarks
+                    'curl': curl_data.curl, 'wx': curl_data.curl, 'remarks': curl_data.remarks
                 }, success: function (data) {
                     if (400 === data.code) {
                         layer.alert(data.msg, {
@@ -130,42 +134,6 @@
 
             return false;
         });
-        form.on('submit(search)', function (data) {
-            const qq_data = data.field
-            $.ajax({
-                url: '/search', method: 'post', data: {
-                    'keyword': qq_data.keyword
-                }, success: function (data) {
-                    if (200 === data.code) {
-                        let msg = '';
-                        if(data.c_state === 0){
-                            msg += '碎片已兑换！\n'
-                        }else {
-                            msg += '碎片未兑换！\n'
-                        }
-                        if(data.p_state === 0){
-                            msg += 'Cookies正常！'
-                        }else {
-                            msg += 'Cookies过期！'
-                        }
-                        layer.alert(msg, {
-                            title: '查询成功！'
-                        })
-                    }else if (302 === data.code) {
-                        layer.alert('查无此号！', {
-                            title: '查询有误！'
-                        })
-                    }else {
-                        layer.alert('未知原因！', {
-                            title: '查询失败！'
-                        })
-                    }
-                }
-            })
-
-            return false;
-        });
-
     });
 </script>
 

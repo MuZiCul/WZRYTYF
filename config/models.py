@@ -10,6 +10,15 @@ class CookiesModel(db.Model):
     url = db.Column(db.String(2000), nullable=False)
     headers = db.Column(db.String(20000), nullable=False)
     data = db.Column(db.String(20000), nullable=False)
-    past_due = db.Column(db.Integer, nullable=False)
-    convertibility = db.Column(db.Integer, nullable=False)
+    Notifications = db.Column(db.Integer)
+    contact = db.Column(db.String(100))
+    create_date = db.Column(db.DateTime, default=datetime.now)
+
+
+class CookiesLogModel(db.Model):
+    __tablename__ = "cookies_log"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    qq = db.Column(db.String(100), nullable=False)
+    remarks = db.Column(db.String(100), unique=True)
+    states = db.Column(db.Integer, nullable=False)
     create_date = db.Column(db.DateTime, default=datetime.now)

@@ -2,16 +2,11 @@ import json
 from datetime import datetime
 import requests
 
+from blueprints.index import updateCookiesLog
+from config.config import COOKIES_STATE_SUCCESS, COOKIES_STATE_OVERDUE, COOKIES_STATE_DEFICIT
 from config.exts import db
 from config.models import CookiesModel
 from utils.utils import send_to_wecom
-
-
-def Reset():
-    cookies_list = CookiesModel.query.all()
-    for cookies in cookies_list:
-        cookies.convertibility = 1
-    db.session.commit()
 
 
 def request_(url, headers, data):
@@ -31,19 +26,10 @@ def SkinDebris():
         result, today = request_(cookies.url, cookies.headers, cookies.data)
         if result != 0:
             if '恭喜您获得了礼包' in result:
+                updateCookiesLog(cookies.qq, cookies.remarks, COOKIES_STATE_SUCCESS)
                 send_to_wecom(cookies.qq + '碎片兑换成功！请及时查收！\n当前时间：' + today)
-                cookies_c = CookiesModel.query.filter_by(qq=cookies.qq).first()
-                cookies_c.convertibility = 0
-                db.session.commit()
             elif '请先登录' in result:
-                cookies_p = CookiesModel.query.filter_by(qq=cookies.qq).first()
-                cookies_p.past_due = 1
-                db.session.commit()
+                updateCookiesLog(cookies.qq, cookies.remarks, COOKIES_STATE_OVERDUE)
                 send_to_wecom(cookies.qq + '的cookies已过期，请及时更新！\n当前时间：' + today)
             elif '体验币不足' in result:
-                cookies_p = CookiesModel.query.filter_by(qq=cookies.qq).first()
-                cookies_p.convertibility = 0
-                db.session.commit()
-                print(cookies.qq + '的体验币不足！\n当前时间：' + today)
-            else:
-                print(cookies.qq + '的cookies正常！\n当前时间：' + today)
+                updateCookiesLog(cookies.qq, cookies.remarks, COOKIES_STATE_DEFICIT)
