@@ -28,10 +28,10 @@
     </div>
     <div class="layui-form-item">
         <div class="layui-input-block">
-            <a href="/" class="layui-btn" >返回</a>
+            <a href="/" class="layui-btn">返回</a>
             <button type="submit" class="layui-btn">查询</button>
             <button type="reset" class="layui-btn layui-btn-primary">重置</button>
-            <a href="/search_all?keyword=All" class="layui-btn" >查询全部</a>
+            <a href="/search_all?keyword=All" class="layui-btn">查询全部</a>
         </div>
     </div>
 </form>
@@ -52,8 +52,21 @@
             , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
             , cols: [[
                 {field: 'id', title: 'ID', sort: true, align: 'center'}
-                , {field: 'qq', title: '账号', align: 'center'}
-                , {field: 'remarks', title: '备注', align: 'center'}
+                , {field: 'qq', title: '账号', sort: true, align: 'center'}
+                , {
+                    field: 'type', title: '类型', align: 'center', sort: true, templet: function (res) {
+                        switch (res.type) {
+                            case 201:
+                                return '<span style="color: #8B2323;">微信账号</span>'
+                            case 202:
+                                return '<span style="color: #0000CD;">QQ账号</span>'
+                            default:
+                                return res.type
+
+                        }
+                    }
+                }
+                , {field: 'remarks', title: '备注', sort: true, align: 'center'}
                 , {
                     field: 'states', title: '状态', align: 'center', sort: true, templet: function (res) {
                         switch (res.states) {

@@ -8,7 +8,7 @@ from flask import Blueprint, render_template, request, jsonify, flash
 from sqlalchemy import and_
 
 from config.config import COOKIES_STATE_ADD, COOKIES_STATE_UPDATE, COOKIES_STATE_SUCCESS, COOKIES_STATE_DEFICIT, \
-    COOKIES_STATE_OVERDUE
+    COOKIES_STATE_OVERDUE, TYPE_WX, TYPE_QQ
 from config.exts import db
 from config.models import CookiesModel, CookiesLogModel
 from utils.utils import IsNull, IsNotNull
@@ -82,10 +82,12 @@ def curl2py(curl_result_list, wx, remarks):
             qq = qq_result_list[0][1:]
             if IsNotNull(qq) and qq[0] == '0':
                 qq = qq[1:]
+            type_ = TYPE_QQ
             # 如果是wx登录，解析wx
             wx_re_expression = re.compile("wxcode=(.*?);", re.S)
             wx_result_list = re.findall(wx_re_expression, curl_result)
             if IsNotNull(wx_result_list):
+                type_ = TYPE_WX
                 if IsNull(wx):
                     return jsonify({'code': 400, 'msg': '当前为微信Curl，请输入微信号！'})
                 else:
@@ -125,15 +127,15 @@ def curl2py(curl_result_list, wx, remarks):
                 code = 400
             else:
                 if '恭喜您获得了礼包' in response_msg:
-                    msg = add_cookies(qq, url, headers, data_dict, remarks) + '，今日兑换成功！'
-                    updateCookiesLog(qq, remarks, COOKIES_STATE_SUCCESS)
+                    msg = add_cookies(qq, type_, url, headers, data_dict, remarks) + '，今日兑换成功！'
+                    updateCookiesLog(qq, type_, remarks, COOKIES_STATE_SUCCESS)
                     code = 200
                 elif '每天只能兑换一次该奖励' in response_msg:
-                    msg = add_cookies(qq, url, headers, data_dict, remarks) + '，今日已兑换！'
+                    msg = add_cookies(qq, type_, url, headers, data_dict, remarks) + '，今日已兑换！'
                     code = 200
                 elif '体验币不足' in response_msg:
-                    msg = add_cookies(qq, url, headers, data_dict, remarks) + '，体验币不足！！'
-                    updateCookiesLog(qq, remarks, COOKIES_STATE_DEFICIT)
+                    msg = add_cookies(qq, type_, url, headers, data_dict, remarks) + '，体验币不足！！'
+                    updateCookiesLog(qq, type_, remarks, COOKIES_STATE_DEFICIT)
                     code = 200
                 else:
                     msg = 'Cookies有误，请重新登陆后获取curl！'
@@ -146,45 +148,46 @@ def curl2py(curl_result_list, wx, remarks):
         return jsonify({'code': 400, 'msg': '系统错误，错误代码：' + str(e)})
 
 
-def add_cookies(qq, url, headers, data_dict, remarks):
+def add_cookies(qq, type_, url, headers, data_dict, remarks):
     headers_data = str(headers)
     data_data = str(data_dict)
     cookies = CookiesModel.query.filter_by(qq=qq).first()
     if not cookies:
-        cookies_model = CookiesModel(qq=qq, url=url, headers=headers_data, data=data_data, remarks=remarks)
+        cookies_model = CookiesModel(qq=qq, url=url, headers=headers_data, data=data_data, type=type_, remarks=remarks)
         db.session.add(cookies_model)
         db.session.commit()
-        updateCookiesLog(qq, remarks, COOKIES_STATE_ADD)
+        updateCookiesLog(qq, type_, remarks, COOKIES_STATE_ADD)
         return '已添加'
     else:
         cookies.url = url
         cookies.headers = headers_data
         cookies.data = data_data
         cookies.remarks = remarks
+        cookies.type = type_
         db.session.commit()
-        updateCookiesLog(qq, remarks, COOKIES_STATE_UPDATE)
+        updateCookiesLog(qq, type_, remarks, COOKIES_STATE_UPDATE)
         return '已更新'
 
 
-def updateCookiesLog(qq, remarks, states):
+def updateCookiesLog(qq, type_, remarks, states):
     if states == COOKIES_STATE_OVERDUE:
         cookies_OVERDUE = CookiesLogModel.query.filter(
             and_(CookiesLogModel.qq == qq, CookiesLogModel.states == COOKIES_STATE_OVERDUE,
                  db.cast(CookiesLogModel.create_date, db.DATE) == db.cast(datetime.now(), db.DATE))).all()
         if not cookies_OVERDUE:
-            updateCookiesLog_(qq, remarks, states)
+            updateCookiesLog_(qq, type_, remarks, states)
     elif states == COOKIES_STATE_DEFICIT:
         cookies_DEFICIT = CookiesLogModel.query.filter(
             and_(CookiesLogModel.qq == qq, CookiesLogModel.states == COOKIES_STATE_DEFICIT,
                  db.cast(CookiesLogModel.create_date, db.DATE) == db.cast(datetime.now(), db.DATE))).all()
         if not cookies_DEFICIT:
-            updateCookiesLog_(qq, remarks, states)
+            updateCookiesLog_(qq, type_, remarks, states)
     else:
-        updateCookiesLog_(qq, remarks, states)
+        updateCookiesLog_(qq, type_, remarks, states)
 
 
-def updateCookiesLog_(qq, remarks, states):
-    cookies_log_model = CookiesLogModel(qq=qq, remarks=remarks, states=states)
+def updateCookiesLog_(qq, type_, remarks, states):
+    cookies_log_model = CookiesLogModel(qq=qq, type=type_, remarks=remarks, states=states)
     db.session.add(cookies_log_model)
     db.session.commit()
 
@@ -201,7 +204,7 @@ def search_data():
     result = result if IsNotNull(result) else CookiesLogModel.query.filter_by(remarks=keyword).order_by(db.text('-create_date')).all()
     data_list = []
     for i in result:
-        dit = {'id': i.id, 'qq': i.qq, 'remarks': i.remarks, 'states': i.states,
+        dit = {'id': i.id, 'qq': i.qq, 'remarks': i.remarks, 'states': i.states, 'type': i.type,
                'create_date': str(i.create_date) if i.create_date else '暂无信息', }
         data_list.append(dit)
     dic = {'code': 0, 'msg': 'SUCCESS', 'count': len(result), 'data': data_list}
@@ -217,7 +220,7 @@ def search_all_data():
     result = CookiesLogModel.query.order_by(db.text('-create_date')).all()
     data_list = []
     for i in result:
-        dit = {'id': i.id, 'qq': i.qq, 'remarks': i.remarks, 'states': i.states,
+        dit = {'id': i.id, 'qq': i.qq, 'remarks': i.remarks, 'states': i.states, 'type': i.type,
                'create_date': str(i.create_date) if i.create_date else '暂无信息', }
         data_list.append(dit)
     dic = {'code': 0, 'msg': 'SUCCESS', 'count': len(result), 'data': data_list}

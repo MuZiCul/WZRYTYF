@@ -26,10 +26,10 @@ def SkinDebris():
         result, today = request_(cookies.url, cookies.headers, cookies.data)
         if result != 0:
             if '恭喜您获得了礼包' in result:
-                updateCookiesLog(cookies.qq, cookies.remarks, COOKIES_STATE_SUCCESS)
+                updateCookiesLog(cookies.qq, cookies.type, cookies.remarks, COOKIES_STATE_SUCCESS)
                 send_to_wecom(cookies.qq + '碎片兑换成功！请及时查收！\n当前时间：' + today)
             elif '请先登录' in result:
-                updateCookiesLog(cookies.qq, cookies.remarks, COOKIES_STATE_OVERDUE)
+                updateCookiesLog(cookies.qq, cookies.type, cookies.remarks, COOKIES_STATE_OVERDUE)
                 send_to_wecom(cookies.qq + '的cookies已过期，请及时更新！\n当前时间：' + today)
             elif '体验币不足' in result:
-                updateCookiesLog(cookies.qq, cookies.remarks, COOKIES_STATE_DEFICIT)
+                updateCookiesLog(cookies.qq, cookies.type, cookies.remarks, COOKIES_STATE_DEFICIT)

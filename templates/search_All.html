@@ -53,6 +53,17 @@
             , cols: [[
                 {field: 'id', title: 'ID', sort: true, align: 'center'}
                 , {field: 'qq', title: '账号', align: 'center'}
+                , {field: 'type', title: '类型', align: 'center', templet: function (res) {
+                        switch (res.type) {
+                            case 201:
+                                return '<span style="color: #8B2323;">微信账号</span>'
+                            case 202:
+                                return '<span style="color: #0000CD;">QQ账号</span>'
+                            default:
+                                return res.type
+
+                        }
+                    }}
                 , {field: 'remarks', title: '备注', align: 'center'}
                 , {
                     field: 'states', title: '状态', align: 'center', sort: true, templet: function (res) {
@@ -72,7 +83,7 @@
                             case 107:
                                 return '<span style="color: #A020F0;">开始兑换</span>'
                             default:
-                                return res.kind
+                                return res.states
 
                         }
                     }
