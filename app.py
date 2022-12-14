@@ -3,7 +3,7 @@ from flask_apscheduler import APScheduler
 
 from blueprints.exchange import SkinDebris
 from utils.utils import send_to_wecom
-from blueprints import index_bp
+from blueprints import index_bp, search_bp
 from config.exts import db
 from flask_migrate import Migrate
 import config.config as config
@@ -17,6 +17,7 @@ migrate = Migrate(app, db)
 
 
 app.register_blueprint(index_bp)
+app.register_blueprint(search_bp)
 scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()

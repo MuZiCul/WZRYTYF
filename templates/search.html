@@ -36,7 +36,7 @@
     </div>
 </form>
 <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
-    <legend>查询结果</legend>
+    <legend>查询关键字：{{ keyword }}&nbsp;&nbsp;账号类型：{{ type }}&nbsp;&nbsp;体验币：{{ exp_voucher }}&nbsp;&nbsp;当前状态：{{ state }}</legend>
 </fieldset>
 <table class="layui-hide" id="search_result"></table>
 
@@ -53,19 +53,6 @@
             , cols: [[
                 {field: 'id', title: 'ID', sort: true, align: 'center'}
                 , {field: 'qq', title: '账号', sort: true, align: 'center'}
-                , {
-                    field: 'type', title: '类型', align: 'center', sort: true, templet: function (res) {
-                        switch (res.type) {
-                            case 201:
-                                return '<span style="color: #8B2323;">微信账号</span>'
-                            case 202:
-                                return '<span style="color: #0000CD;">QQ账号</span>'
-                            default:
-                                return res.type
-
-                        }
-                    }
-                }
                 , {field: 'remarks', title: '备注', sort: true, align: 'center'}
                 , {
                     field: 'states', title: '状态', align: 'center', sort: true, templet: function (res) {
