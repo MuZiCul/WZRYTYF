@@ -86,19 +86,22 @@ def get_exp_voucher(keyword):
     if IsNotNull(keyword):
         cookies = CookiesModel.query.filter_by(qq=keyword).first()
         cookies = cookies if cookies else CookiesModel.query.filter_by(remarks=keyword).first()
+        cookies = cookies if cookies else CookiesModel.query.filter_by(wx=keyword).first()
         if cookies:
             result_log = CookiesLogModel.query.filter_by(qq=keyword).order_by(db.text('-create_date')).all()
             result_log = result_log if result_log else CookiesLogModel.query.filter_by(remarks=keyword).order_by(db.text('-create_date')).all()
+            result_log = result_log if result_log else CookiesLogModel.query.filter_by(wx=keyword).order_by(
+                db.text('-create_date')).all()
             if result_log:
                 state = result_log[0].states
                 type_ = result_log[0].type
             if state != COOKIES_STATE_OVERDUE:
-                result, today = request_(cookies.url, cookies.headers, str(get_exp_voucher_data(eval(cookies.data))))
+                result, today = request_(cookies.url, cookies.headers, str(get_exp_voucher_data(eval(cookies.data), type_)))
                 exp_voucher = eval(result).get('modRet').get('jData').get('exp_voucher')
     return exp_voucher, get_cookies_state(state), get_type(type_)
 
 
-def get_exp_voucher_data(data_):
+def get_exp_voucher_data(data_, type_):
     new_data = {'sArea': data_['sArea'],
                 'appid': '1104791911',
                 'iActivityId': data_['iActivityId'],
@@ -112,6 +115,9 @@ def get_exp_voucher_data(data_):
                 'sServiceDepartment': data_['sServiceDepartment'],
                 'sServiceType': data_['sServiceType'],
                 'xhrPostKey': data_['xhrPostKey']}
+    if type_ == TYPE_WX:
+        new_data['ams_appname'] = 'YXZJ_TO_TIYAN'
+        new_data['ams_targetappid'] = 'wx71a79717188d990b'
     return new_data
 
 

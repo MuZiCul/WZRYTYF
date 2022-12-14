@@ -58,11 +58,19 @@ def curl2py(curl_result_list, wx, remarks):
                 if IsNull(wx):
                     return jsonify({'code': 400, 'msg': '当前为微信Curl，请输入微信号！'})
                 else:
-                    qq = wx
+                    openid_re_expression = re.compile("; openid=(.*?);", re.S)
+                    openid_result_list = re.findall(openid_re_expression, curl_result)
+                    qq = openid_result_list[0]
+            else:
+                wx = qq
             if IsNotNull(remarks):
                 cookies_remarks = CookiesModel.query.filter_by(remarks=remarks).first()
                 if cookies_remarks and cookies_remarks.qq != qq:
-                    return jsonify({'code': 400, 'msg': '当前备注已被占用！'})
+                    return jsonify({'code': 400, 'msg': '备注被占用，请检查或更换！'})
+            if IsNotNull(wx):
+                cookies_remarks = CookiesModel.query.filter_by(wx=wx).first()
+                if cookies_remarks and cookies_remarks.qq != qq:
+                    return jsonify({'code': 400, 'msg': '微信号被占用，请检查或更换！'})
             # 解析出请求Url
             url_re_expression = re.compile("(http.*?)'", re.S)
             url_result_list = re.findall(url_re_expression, curl_result)
@@ -94,15 +102,15 @@ def curl2py(curl_result_list, wx, remarks):
                 code = 400
             else:
                 if '恭喜您获得了礼包' in response_msg:
-                    msg = add_cookies(qq, type_, url, headers, data_dict, remarks) + '，今日兑换成功！'
-                    updateCookiesLog(qq, type_, remarks, COOKIES_STATE_SUCCESS)
+                    msg = add_cookies(qq, wx, type_, url, headers, data_dict, remarks) + '，今日兑换成功！'
+                    updateCookiesLog(wx, type_, remarks, COOKIES_STATE_SUCCESS)
                     code = 200
                 elif '每天只能兑换一次该奖励' in response_msg:
-                    msg = add_cookies(qq, type_, url, headers, data_dict, remarks) + '，今日已兑换！'
+                    msg = add_cookies(qq, wx, type_, url, headers, data_dict, remarks) + '，今日已兑换！'
                     code = 200
                 elif '体验币不足' in response_msg:
-                    msg = add_cookies(qq, type_, url, headers, data_dict, remarks) + '，体验币不足！！'
-                    updateCookiesLog(qq, type_, remarks, COOKIES_STATE_DEFICIT)
+                    msg = add_cookies(qq, wx, type_, url, headers, data_dict, remarks) + '，体验币不足！！'
+                    updateCookiesLog(wx, type_, remarks, COOKIES_STATE_DEFICIT)
                     code = 200
                 else:
                     msg = 'Cookies有误，请重新登陆后获取curl！'
@@ -115,24 +123,25 @@ def curl2py(curl_result_list, wx, remarks):
         return jsonify({'code': 400, 'msg': '系统错误，错误代码：' + str(e)})
 
 
-def add_cookies(qq, type_, url, headers, data_dict, remarks):
+def add_cookies(qq, wx, type_, url, headers, data_dict, remarks):
     headers_data = str(headers)
     data_data = str(data_dict)
     cookies = CookiesModel.query.filter_by(qq=qq).first()
     if not cookies:
-        cookies_model = CookiesModel(qq=qq, url=url, headers=headers_data, data=data_data, type=type_, remarks=remarks)
+        cookies_model = CookiesModel(qq=qq, wx=wx, url=url, headers=headers_data, data=data_data, type=type_, remarks=remarks)
         db.session.add(cookies_model)
         db.session.commit()
-        updateCookiesLog(qq, type_, remarks, COOKIES_STATE_ADD)
+        updateCookiesLog(wx, type_, remarks, COOKIES_STATE_ADD)
         return '已添加'
     else:
         cookies.url = url
         cookies.headers = headers_data
         cookies.data = data_data
+        cookies.wx = wx
         cookies.remarks = remarks
         cookies.type = type_
         db.session.commit()
-        updateCookiesLog(qq, type_, remarks, COOKIES_STATE_UPDATE)
+        updateCookiesLog(wx, type_, remarks, COOKIES_STATE_UPDATE)
         return '已更新'
 
 
