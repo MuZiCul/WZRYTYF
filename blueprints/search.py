@@ -87,13 +87,14 @@ def get_exp_voucher(keyword):
         cookies = CookiesModel.query.filter_by(qq=keyword).first()
         cookies = cookies if cookies else CookiesModel.query.filter_by(remarks=keyword).first()
         if cookies:
-            result, today = request_(cookies.url, cookies.headers, str(get_exp_voucher_data(eval(cookies.data))))
-            exp_voucher = eval(result).get('modRet').get('jData').get('exp_voucher')
             result_log = CookiesLogModel.query.filter_by(qq=keyword).order_by(db.text('-create_date')).all()
             result_log = result_log if result_log else CookiesLogModel.query.filter_by(remarks=keyword).order_by(db.text('-create_date')).all()
             if result_log:
                 state = result_log[0].states
                 type_ = result_log[0].type
+            if state != COOKIES_STATE_OVERDUE:
+                result, today = request_(cookies.url, cookies.headers, str(get_exp_voucher_data(eval(cookies.data))))
+                exp_voucher = eval(result).get('modRet').get('jData').get('exp_voucher')
     return exp_voucher, get_cookies_state(state), get_type(type_)
 
 
