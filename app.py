@@ -1,7 +1,7 @@
 from flask import Flask, redirect, url_for
 from flask_apscheduler import APScheduler
 
-from blueprints.exchange import SkinDebris
+from blueprints.exchange import SkinDebris, CheckWZRY
 from utils.utils import send_to_wecom
 from blueprints import index_bp, search_bp
 from config.exts import db
@@ -35,6 +35,15 @@ def SkinDebris_():
             SkinDebris()
     except Exception as e:
         send_to_wecom('体验服服务器异常，请检查！\n错误详情：'+ str(e))
+
+
+@scheduler.task('interval', id='CheckWZRY', minutes=120)
+def CheckWZRY_():
+    try:
+        with scheduler.app.app_context():
+            CheckWZRY()
+    except Exception as e:
+        send_to_wecom('体验服服务器异常，更新检测异常，请检查！\n错误详情：'+ str(e))
 
 
 if __name__ == '__main__':
