@@ -33,5 +33,7 @@ def SkinDebris():
                 send_to_wecom(cookies.qq + '的cookies已过期，请及时更新！\n当前时间：' + today)
             elif '体验币不足' in result:
                 updateCookiesLog(cookies.qq, cookies.type, cookies.remarks, COOKIES_STATE_DEFICIT)
+            elif '每天只能兑换一次该奖励' in result:
+                pass
             else:
                 send_to_wecom('体验服服务器异常，请检查！\n当前时间：' + today)

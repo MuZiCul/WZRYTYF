@@ -34,7 +34,7 @@ def get_curl():
         if curl_result_list:
             return curl2py(curl_result_list, wx, remarks)
         else:
-            return jsonify({'code': 400, 'msg': 'curl格式有误'})
+            return jsonify({'code': 400, 'msg': 'Curl似乎不对哦，请检查！'})
     else:
         return jsonify({'code': 400, 'msg': '系统错误'})
 
@@ -46,6 +46,8 @@ def curl2py(curl_result_list, wx, remarks):
             # 解析QQ号
             qq_re_expression = re.compile("ied_qq=(.*?);", re.S)
             qq_result_list = re.findall(qq_re_expression, curl_result)
+            if IsNull(qq_result_list):
+                return jsonify({'code': 400, 'msg': 'Curl似乎不对哦，请检查！'})
             qq = qq_result_list[0][1:]
             if IsNotNull(qq) and qq[0] == '0':
                 qq = qq[1:]
@@ -74,10 +76,14 @@ def curl2py(curl_result_list, wx, remarks):
             # 解析出请求Url
             url_re_expression = re.compile("(http.*?)'", re.S)
             url_result_list = re.findall(url_re_expression, curl_result)
+            if IsNull(url_result_list):
+                return jsonify({'code': 400, 'msg': 'Curl似乎不对哦，请检查！'})
             url = url_result_list[0]
             # 解析头文件
             headers_re_expression = re.compile("-H '(.*?)'", re.S)
             headers_result_list = re.findall(headers_re_expression, curl_result)
+            if IsNull(headers_result_list):
+                return jsonify({'code': 400, 'msg': 'Curl似乎不对哦，请检查！'})
             headers = {}
             for header_str in headers_result_list:  # 拼接头文件列表为字典类型
                 if ":" in header_str:
@@ -87,6 +93,8 @@ def curl2py(curl_result_list, wx, remarks):
             # 解析data：
             data_re_expression = re.compile("--data-raw '(.*?)'", re.S)
             data_result_list = re.findall(data_re_expression, curl_result)
+            if IsNull(data_result_list):
+                return jsonify({'code': 400, 'msg': 'Curl似乎不对哦，请检查！'})
             data = unquote(data_result_list[0])
             data_list = data.split('&')
             data_dict = {}
@@ -120,7 +128,7 @@ def curl2py(curl_result_list, wx, remarks):
             code = 400
         return jsonify({'code': code, 'msg': msg})
     except Exception as e:
-        return jsonify({'code': 400, 'msg': '系统错误，错误代码：' + str(e)})
+        return jsonify({'code': 400, 'msg': 'Cookies有误，请重新登陆后获取curl，错误代码：' + str(e)})
 
 
 def add_cookies(qq, wx, type_, url, headers, data_dict, remarks):
