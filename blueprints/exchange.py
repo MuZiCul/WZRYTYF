@@ -52,14 +52,14 @@ def CheckWZRY():
     URL = 'https://apps.game.qq.com/cmc/cross?serviceId=18&filter=channel&sortby=sIdxTime&source=web_pc&limit=6&logic=or&typeids=1&chanid=1766&start=0&exclusiveChannel=4&exclusiveChannelSign=71e03783c3cc69af7bc422532ee43495&time=1670440180'
     try:
         response = requests.get(url=URL, headers=headers_User_Agent)
-        json_data = json.loads(response.text)
-        data = json_data['data']['items'][0]
-        tid = data['iId']
-        sCreated = data['sCreated']
-        dCreated = data['sCreated'][:10]
-        today = str(datetime.date.today())
-        tUrl = 'https://pvp.qq.com/cp/a20161115tyf/detail.shtml?tid='+str(tid)
         if response.status_code == 200:
+            json_data = json.loads(response.text)
+            data = json_data['data']['items'][0]
+            tid = data['iId']
+            sCreated = data['sTargetIdxTime']
+            dCreated = data['sTargetIdxTime'][:10]
+            today = str(datetime.date.today())
+            tUrl = 'https://pvp.qq.com/cp/a20161115tyf/detail.shtml?tid=' + str(tid)
             if dCreated == today:
                 send_to_wecom('体验服又更新啦，请及时查看并更新！<a href=\"'+tUrl+'\">点击查看更新内容</a>\n更新时间：'+sCreated)
                 URL = 'https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?p0=18&source=web_pc&id='+str(tid)
