@@ -111,6 +111,7 @@ def curl2py(curl_result_list, wx, remarks):
             else:
                 if '恭喜您获得了礼包' in response_msg:
                     msg = add_cookies(qq, wx, type_, url, headers, data_dict, remarks) + '，今日兑换成功！'
+                    updateCookiesStates(qq, COOKIES_STATE_SUCCESS)
                     updateCookiesLog(wx, type_, remarks, COOKIES_STATE_SUCCESS)
                     code = 200
                 elif '每天只能兑换一次该奖励' in response_msg:
@@ -118,6 +119,7 @@ def curl2py(curl_result_list, wx, remarks):
                     code = 200
                 elif '体验币不足' in response_msg:
                     msg = add_cookies(qq, wx, type_, url, headers, data_dict, remarks) + '，体验币不足！！'
+                    updateCookiesStates(qq, COOKIES_STATE_DEFICIT)
                     updateCookiesLog(wx, type_, remarks, COOKIES_STATE_DEFICIT)
                     code = 200
                 else:
@@ -136,7 +138,7 @@ def add_cookies(qq, wx, type_, url, headers, data_dict, remarks):
     data_data = str(data_dict)
     cookies = CookiesModel.query.filter_by(qq=qq).first()
     if not cookies:
-        cookies_model = CookiesModel(qq=qq, wx=wx, url=url, headers=headers_data, data=data_data, type=type_, remarks=remarks)
+        cookies_model = CookiesModel(qq=qq, wx=wx, url=url, headers=headers_data, data=data_data, type=type_, remarks=remarks, states=COOKIES_STATE_ADD)
         db.session.add(cookies_model)
         db.session.commit()
         updateCookiesLog(wx, type_, remarks, COOKIES_STATE_ADD)
@@ -148,6 +150,7 @@ def add_cookies(qq, wx, type_, url, headers, data_dict, remarks):
         cookies.wx = wx
         cookies.remarks = remarks
         cookies.type = type_
+        cookies.states = COOKIES_STATE_UPDATE
         db.session.commit()
         updateCookiesLog(wx, type_, remarks, COOKIES_STATE_UPDATE)
         return '已更新'
@@ -173,6 +176,12 @@ def updateCookiesLog(qq, type_, remarks, states):
 def updateCookiesLog_(qq, type_, remarks, states):
     cookies_log_model = CookiesLogModel(qq=qq, type=type_, remarks=remarks, states=states)
     db.session.add(cookies_log_model)
+    db.session.commit()
+
+
+def updateCookiesStates(qq, states_):
+    cookies = CookiesModel.query.filter_by(qq=qq).first()
+    cookies.states = states_
     db.session.commit()
 
 

@@ -14,6 +14,7 @@ class CookiesModel(db.Model):
     Notifications = db.Column(db.Integer)
     contact = db.Column(db.String(100))
     type = db.Column(db.Integer)
+    states = db.Column(db.Integer)
     create_date = db.Column(db.DateTime, default=datetime.now)
 
 
@@ -22,6 +23,6 @@ class CookiesLogModel(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     qq = db.Column(db.String(100), nullable=False)
     remarks = db.Column(db.String(100))
-    states = db.Column(db.Integer, nullable=False)
+    states = db.Column(db.Integer)
     type = db.Column(db.Integer)
     create_date = db.Column(db.DateTime, default=datetime.now)

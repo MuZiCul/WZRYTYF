@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 import requests
 
-from blueprints.index import updateCookiesLog
+from blueprints.index import updateCookiesLog, updateCookiesStates
 from config.config import COOKIES_STATE_SUCCESS, COOKIES_STATE_OVERDUE, COOKIES_STATE_DEFICIT
 from config.exts import db
 from config.models import CookiesModel
@@ -27,12 +27,18 @@ def SkinDebris():
         if result != 0:
             if '恭喜您获得了礼包' in result:
                 updateCookiesLog(cookies.qq, cookies.type, cookies.remarks, COOKIES_STATE_SUCCESS)
+                updateCookiesStates(cookies.qq, COOKIES_STATE_SUCCESS)
                 send_to_wecom(cookies.qq + '碎片兑换成功！请及时查收！\n当前时间：' + today)
             elif '请先登录' in result:
-                updateCookiesLog(cookies.qq, cookies.type, cookies.remarks, COOKIES_STATE_OVERDUE)
-                send_to_wecom(cookies.qq + '的cookies已过期，请及时更新！\n当前时间：' + today)
+                if cookies.states != COOKIES_STATE_OVERDUE:
+                    updateCookiesLog(cookies.qq, cookies.type, cookies.remarks, COOKIES_STATE_OVERDUE)
+                    updateCookiesStates(cookies.qq, COOKIES_STATE_OVERDUE)
+                    send_to_wecom(cookies.qq + '的cookies已过期，请及时更新！\n当前时间：' + today)
             elif '体验币不足' in result:
-                updateCookiesLog(cookies.qq, cookies.type, cookies.remarks, COOKIES_STATE_DEFICIT)
+                if cookies.states != COOKIES_STATE_DEFICIT:
+                    updateCookiesLog(cookies.qq, cookies.type, cookies.remarks, COOKIES_STATE_DEFICIT)
+                    updateCookiesStates(cookies.qq, COOKIES_STATE_DEFICIT)
+                    send_to_wecom(cookies.qq + '的体验币不足！\n当前时间：' + today)
             elif '每天只能兑换一次该奖励' in result:
                 pass
             else:
