@@ -41,8 +41,6 @@ def SkinDebris():
                     send_to_wecom(cookies.qq + '的体验币不足！\n当前时间：' + today)
             elif '每天只能兑换一次该奖励' in result:
                 pass
-            else:
-                send_to_wecom('体验服服务器异常，请检查！\n当前时间：' + today)
 
 
 def CheckWZRY():
