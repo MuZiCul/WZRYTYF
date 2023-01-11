@@ -26,3 +26,11 @@ class CookiesLogModel(db.Model):
     states = db.Column(db.Integer)
     type = db.Column(db.Integer)
     create_date = db.Column(db.DateTime, default=datetime.now)
+
+
+class UpdateLogModel(db.Model):
+    __tablename__ = "update_log"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    update_date = db.Column(db.String(100))
+    update_url = db.Column(db.String(500))
+    create_date = db.Column(db.DateTime, default=datetime.now)

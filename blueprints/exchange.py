@@ -5,7 +5,7 @@ import requests
 from blueprints.index import updateCookiesLog, updateCookiesStates
 from config.config import COOKIES_STATE_SUCCESS, COOKIES_STATE_OVERDUE, COOKIES_STATE_DEFICIT
 from config.exts import db
-from config.models import CookiesModel
+from config.models import CookiesModel, UpdateLogModel
 from utils.utils import send_to_wecom
 
 
@@ -65,16 +65,21 @@ def CheckWZRY():
             today = str(datetime.date.today())
             tUrl = 'https://pvp.qq.com/cp/a20161115tyf/detail.shtml?tid=' + str(tid)
             if dCreated == today:
-                send_to_wecom('体验服又更新啦，请及时查看并更新！<a href=\"'+tUrl+'\">点击查看更新内容</a>\n更新时间：'+sCreated)
-                URL = 'https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?p0=18&source=web_pc&id='+str(tid)
-                response = requests.get(url=URL, headers=headers_User_Agent)
-                data1 = json.loads(response.text[14:-1])['msg']['sContent']
-                data = etree.HTML(text=data1)
-                result = data.xpath('string(.)')
-                msgList = []
-                msgList = reMsg(result, msgList)
-                for i in msgList:
-                    send_to_wecom(i)
+                update_list = UpdateLogModel.query.filter_by(update_date=sCreated).all()
+                if len(update_list) < 1:
+                    update_list_model = UpdateLogModel(update_date=sCreated, update_url=tUrl)
+                    db.session.add(update_list_model)
+                    db.session.commit()
+                    send_to_wecom('体验服又更新啦，请及时查看并更新！<a href=\"'+tUrl+'\">点击查看更新内容</a>\n更新时间：'+sCreated)
+                    URL = 'https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?p0=18&source=web_pc&id='+str(tid)
+                    response = requests.get(url=URL, headers=headers_User_Agent)
+                    data1 = json.loads(response.text[14:-1])['msg']['sContent']
+                    data = etree.HTML(text=data1)
+                    result = data.xpath('string(.)')
+                    msgList = []
+                    msgList = reMsg(result, msgList)
+                    for i in msgList:
+                        send_to_wecom(i)
         else:
             send_to_wecom('王者体验服监听服务异常！')
     except Exception as e:

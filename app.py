@@ -37,7 +37,7 @@ def SkinDebris_():
         send_to_wecom('体验服服务器异常，请检查！\n错误详情：'+ str(e))
 
 
-@scheduler.task('interval', id='CheckWZRY', minutes=120)
+@scheduler.task('interval', id='CheckWZRY', minutes=5)
 def CheckWZRY_():
     try:
         with scheduler.app.app_context():
