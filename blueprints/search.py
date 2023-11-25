@@ -97,7 +97,10 @@ def get_exp_voucher(keyword):
                 type_ = result_log[0].type
             if state != COOKIES_STATE_OVERDUE:
                 result, today = request_(cookies.url, cookies.headers, str(get_exp_voucher_data(eval(cookies.data), type_)))
-                exp_voucher = eval(result).get('modRet').get('jData').get('exp_voucher')
+                try:
+                    exp_voucher = eval(result).get('modRet').get('jData').get('exp_voucher')
+                except Exception as e:
+                    exp_voucher = '未知'
     return exp_voucher, get_cookies_state(state), get_type(type_)
 
 
