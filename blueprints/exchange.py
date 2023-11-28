@@ -71,13 +71,12 @@ def CheckWZRY():
                     update_list_model = UpdateLogModel(update_date=sCreated, update_url=tUrl)
                     db.session.add(update_list_model)
                     db.session.commit()
-                    send_to_wecom('体验服又更新啦，请及时查看并更新！<a href=\"'+tUrl+'\">点击查看更新内容</a>\n更新时间：'+sCreated)
                     URL = 'https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?p0=18&source=web_pc&id='+str(tid)
                     response = requests.get(url=URL, headers=headers_User_Agent)
                     data1 = json.loads(response.text[14:-1])['msg']['sContent']
                     data = etree.HTML(text=data1)
                     result = data.xpath('string(.)')
-                    msgList = get_send_msg(result)
+                    msgList = get_send_msg(result,tUrl)
                     for i in msgList:
                         send_to_wecom(i)
         else:
@@ -87,21 +86,22 @@ def CheckWZRY():
 
 
 def extract_between_chars(s, start, end):
-    pattern = f"{re.escape(start)}(.*?){re.escape(end)}"
-    match = re.search(pattern, s)
-    if match:
-        result = match.group(1)
-        return result
-    else:
-        return None
+    idx1 = s.index(start)
+    idx2 = s.index(end)
 
-def get_send_msg(result):
+    output = s[idx1 + len(start): idx2]
+    if output:
+        return output
+    else:
+        return ''
+
+def get_send_msg(result,tUrl):
     time = extract_between_chars(result,'【更新时间】','【更新方式】')
     type = extract_between_chars(result,'【更新方式】','【更新范围】')
     range = extract_between_chars(result,'【更新范围】','【下载地址】')
     content = result.split('【更新内容】')[1]
     msgList = []
-    msgList.append('更新时间：'+time+'\n更新方式：'+type+'\n更新范围：'+range+'\n更新内容：\n')
+    msgList.append('体验服又更新啦，请及时查看并更新！<a href=\"'+tUrl+'\">点击查看更新内容</a>\n更新时间：'+time+'更新方式：'+type+'更新范围：'+range)
     msgList = reMsg(content, msgList)
     return msgList
 
