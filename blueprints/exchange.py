@@ -71,18 +71,25 @@ def CheckWZRY():
                     update_list_model = UpdateLogModel(update_date=sCreated, update_url=tUrl)
                     db.session.add(update_list_model)
                     db.session.commit()
-                    URL = 'https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?p0=18&source=web_pc&id='+str(tid)
+                    URL = 'https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?p0=18&source=web_pc&id=' + str(tid)
                     response = requests.get(url=URL, headers=headers_User_Agent)
                     data1 = json.loads(response.text[14:-1])['msg']['sContent']
                     data = etree.HTML(text=data1)
                     result = data.xpath('string(.)')
-                    msgList = get_send_msg(result,tUrl)
-                    for i in msgList:
-                        send_to_wecom(i)
+                    sure = 0
+                    msgList, sure = get_send_msg(result, tUrl, sure)
+                    if sure:
+                        msgList1 = []
+                        msgList1 = reMsg(msgList, msgList1)
+                        for i in msgList1:
+                            send_to_wecom(i)
+                    else:
+                        for i in msgList:
+                            send_to_wecom(i)
         else:
             send_to_wecom('王者体验服监听服务异常！')
     except Exception as e:
-        send_to_wecom('王者体验服监听服务异常！\n错误代码：\n'+str(e))
+        send_to_wecom('王者体验服监听服务异常！\n错误代码：\n' + str(e))
 
 
 def extract_between_chars(s, start, end):
@@ -95,19 +102,24 @@ def extract_between_chars(s, start, end):
     else:
         return ''
 
-def get_send_msg(result,tUrl):
-    time = extract_between_chars(result,'【更新时间】','【更新方式】')
-    type = extract_between_chars(result,'【更新方式】','【更新范围】')
-    range = extract_between_chars(result,'【更新范围】','【下载地址】')
+
+def get_send_msg(result, tUrl, sure):
+    if '更新时间' not in result:
+        sure = 1
+        return result, sure
+    time = extract_between_chars(result, '【更新时间】', '【更新方式】')
+    type = extract_between_chars(result, '【更新方式】', '【更新范围】')
+    range = extract_between_chars(result, '【更新范围】', '【下载地址】')
     content = result.split('【更新内容】')[1]
     msgList = []
-    msgList.append('体验服又更新啦，请及时查看并更新！<a href=\"'+tUrl+'\">点击查看更新内容</a>\n更新时间：'+time+'\n更新方式：'+type+'\n更新范围：'+range)
+    msgList.append(
+        '体验服又更新啦，请及时查看并更新！<a href=\"' + tUrl + '\">点击查看更新内容</a>\n更新时间：' + time + '\n更新方式：' + type + '\n更新范围：' + range)
     msgList = reMsg(content, msgList)
-    return msgList
+    return msgList, sure
 
 
 def reMsg(msg, msgList):
-    if len(msg)>800:
+    if len(msg) > 800:
         msgList.append(msg[:800])
         return reMsg(msg[800:], msgList)
     else:
