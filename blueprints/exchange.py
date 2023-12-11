@@ -110,11 +110,9 @@ def get_send_msg(result, tUrl, sure):
     time = extract_between_chars(result, '【更新时间】', '【更新方式】')
     type = extract_between_chars(result, '【更新方式】', '【更新范围】')
     range = extract_between_chars(result, '【更新范围】', '【下载地址】')
-    content = result.split('【更新内容】')[1]
     msgList = []
     msgList.append(
         '体验服又更新啦，请及时查看并更新！<a href=\"' + tUrl + '\">点击查看更新内容</a>\n更新时间：' + time + '\n更新方式：' + type + '\n更新范围：' + range)
-    msgList = reMsg(content, msgList)
     return msgList, sure
 
 
