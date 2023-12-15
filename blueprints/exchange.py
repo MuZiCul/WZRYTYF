@@ -76,16 +76,13 @@ def CheckWZRY():
                     data1 = json.loads(response.text[14:-1])['msg']['sContent']
                     data = etree.HTML(text=data1)
                     result = data.xpath('string(.)')
-                    sure = 0
-                    msgList, sure = get_send_msg(result, tUrl, sure)
-                    if sure:
-                        msgList1 = []
-                        msgList1 = reMsg(msgList, msgList1)
-                        for i in msgList1:
-                            send_to_wecom(i)
+                    msgList = []
+                    if '更新时间' not in result:
+                        msgList = reMsg(result, msgList)
                     else:
-                        for i in msgList:
-                            send_to_wecom(i)
+                        msgList = get_send_msg(result, tUrl, msgList)
+                    for i in msgList:
+                        send_to_wecom(i)
         else:
             send_to_wecom('王者体验服监听服务异常！')
     except Exception as e:
@@ -103,23 +100,33 @@ def extract_between_chars(s, start, end):
         return ''
 
 
-def get_send_msg(result, tUrl, sure):
-    if '更新时间' not in result:
-        sure = 1
-        return result, sure
+def get_send_msg(result, tUrl, msgList):
     time = extract_between_chars(result, '【更新时间】', '【更新方式】')
     type = extract_between_chars(result, '【更新方式】', '【更新范围】')
     range = extract_between_chars(result, '【更新范围】', '【下载地址】')
-    msgList = []
+    content = result.split('【更新内容】')[1]
     msgList.append(
-        '体验服又更新啦，请及时查看并更新！<a href=\"' + tUrl + '\">点击查看更新内容</a>\n更新时间：' + time + '\n更新方式：' + type + '\n更新范围：' + range)
-    return msgList, sure
+        '体验服又更新啦，请及时查看并更新！<a href=\"' + tUrl + '\">点击查看更新内容</a>\n更新时间：' + time + '更新方式：' + type + '更新范围：' + range)
+    msgList = reMsg(content, msgList)
+    return msgList
 
 
 def reMsg(msg, msgList):
     if len(msg) > 800:
-        msgList.append(msg[:800])
-        return reMsg(msg[800:], msgList)
+        s = msg[:800]
+        result_index = find_last_keyword_position(s)
+        if result_index == 0 or result_index is None:
+            return msgList
+        msgList.append(msg[:result_index])
+        return reMsg(msg[result_index:], msgList)
     else:
         msgList.append(msg)
         return msgList
+
+
+def find_last_keyword_position(s):
+    matches = list(re.finditer(r'\n\d', s))
+    if matches:
+        return matches[-1].start()
+    else:
+        return None
