@@ -129,4 +129,7 @@ def find_last_keyword_position(s):
     if matches:
         return matches[-1].start()
     else:
+        matches1 = list(re.finditer(r'\n\d', s))
+        if not matches and matches1:
+            return matches1[-1].start()
         return None
