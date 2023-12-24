@@ -54,35 +54,37 @@ def CheckWZRY():
         'Accept-Encoding': 'gzip, deflate, br',
         'Connection': 'keep-alive',
     }
-    URL = 'https://apps.game.qq.com/cmc/cross?serviceId=18&filter=channel&sortby=sIdxTime&source=web_pc&limit=6&logic=or&typeids=1&chanid=1766&start=0&exclusiveChannel=4&exclusiveChannelSign=71e03783c3cc69af7bc422532ee43495&time=1670440180'
+    URL = 'https://apps.game.qq.com/cmc/cross?serviceId=18&filter=channel&sortby=sIdxTime&source=web_pc&limit=12&logic=or&typeids=1&chanid=1762&start=0&withtop=yes&exclusiveChannel=4&exclusiveChannelSign=76528c167dacd68a55d46c72bbe31b68&time=1679568000'
     try:
         response = requests.get(url=URL, headers=headers_User_Agent)
         if response.status_code == 200:
             json_data = json.loads(response.text)
             data = json_data['data']['items'][0]
-            tid = data['iId']
-            sCreated = data['sTargetIdxTime']
-            dCreated = data['sTargetIdxTime'][:10]
-            today = str(datetime.date.today())
-            tUrl = 'https://pvp.qq.com/cp/a20161115tyf/detail.shtml?tid=' + str(tid)
-            if dCreated == today:
-                update_list = UpdateLogModel.query.filter_by(update_date=sCreated).all()
-                if len(update_list) < 1:
-                    update_list_model = UpdateLogModel(update_date=sCreated, update_url=tUrl)
-                    db.session.add(update_list_model)
-                    db.session.commit()
-                    URL = 'https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?p0=18&source=web_pc&id=' + str(tid)
-                    response = requests.get(url=URL, headers=headers_User_Agent)
-                    data1 = json.loads(response.text[14:-1])['msg']['sContent']
-                    data = etree.HTML(text=data1)
-                    result = data.xpath('string(.)')
-                    msgList = []
-                    if '更新时间' not in result:
-                        msgList = reMsg(result, msgList)
-                    else:
-                        msgList = get_send_msg(result, tUrl, msgList)
-                    for i in msgList:
-                        send_to_wecom(i)
+            sTargetTitle = data['sTargetTitle']
+            if '体验服' in sTargetTitle:
+                tid = data['iId']
+                sCreated = data['sTargetIdxTime']
+                dCreated = data['sTargetIdxTime'][:10]
+                today = str(datetime.date.today())
+                tUrl = 'https://pvp.qq.com/cp/a20161115tyf/detail.shtml?tid=' + str(tid)
+                if dCreated == today:
+                    update_list = UpdateLogModel.query.filter_by(update_date=sCreated).all()
+                    if len(update_list) < 1:
+                        update_list_model = UpdateLogModel(update_date=sCreated, update_url=tUrl)
+                        db.session.add(update_list_model)
+                        db.session.commit()
+                        URL = 'https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?p0=18&source=web_pc&id=' + str(tid)
+                        response = requests.get(url=URL, headers=headers_User_Agent)
+                        data1 = json.loads(response.text[14:-1])['msg']['sContent']
+                        data = etree.HTML(text=data1)
+                        result = data.xpath('string(.)')
+                        msgList = []
+                        if '更新时间' not in result:
+                            msgList = reMsg(result, msgList)
+                        else:
+                            msgList = get_send_msg(result, tUrl, msgList)
+                        for i in msgList:
+                            send_to_wecom(i)
         else:
             send_to_wecom('王者体验服监听服务异常！')
     except Exception as e:
