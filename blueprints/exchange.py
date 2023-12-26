@@ -64,29 +64,26 @@ def CheckWZRY():
             if '体验服' in sTargetTitle:
                 tid = data['iId']
                 sCreated = data['sTargetIdxTime']
-                dCreated = data['sTargetIdxTime'][:10]
-                today = str(datetime.date.today())
                 tUrl = 'https://pvp.qq.com/cp/a20161115tyf/detail.shtml?tid=' + str(tid)
-                if dCreated == today:
-                    update_list = UpdateLogModel.query.filter_by(update_date=sCreated).all()
-                    if len(update_list) < 1:
-                        update_list_model = UpdateLogModel(update_date=sCreated, update_url=tUrl)
-                        db.session.add(update_list_model)
-                        db.session.commit()
-                        URL = 'https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?p0=18&source=web_pc&id=' + str(tid)
-                        response = requests.get(url=URL, headers=headers_User_Agent)
-                        data1 = json.loads(response.text[14:-1])['msg']['sContent']
-                        data = etree.HTML(text=data1)
-                        result = data.xpath('string(.)')
-                        msgList = []
-                        if '更新时间' not in result:
-                            msgList = reMsg(result, msgList)
-                        else:
-                            msgList = get_send_msg(result, tUrl, msgList)
-                        for i in msgList:
-                            send_to_wecom(i)
+                update_list = UpdateLogModel.query.filter_by(update_id=tid).all()
+                if len(update_list) < 1:
+                    update_log_model = UpdateLogModel(update_date=sCreated, update_id=tid)
+                    db.session.add(update_log_model)
+                    db.session.commit()
+                    URL = 'https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?p0=18&source=web_pc&id=' + str(tid)
+                    response = requests.get(url=URL, headers=headers_User_Agent)
+                    data1 = json.loads(response.text[14:-1])['msg']['sContent']
+                    data = etree.HTML(text=data1)
+                    result = data.xpath('string(.)')
+                    msgList = []
+                    if '更新时间' not in result:
+                        msgList = reMsg(result, msgList)
+                    else:
+                        msgList = get_send_msg(result, tUrl, msgList)
+                    for i in msgList:
+                        send_to_wecom(i)
         else:
-            send_to_wecom('王者体验服监听服务异常！')
+            send_to_wecom('王者体验服监听服务异常！response.status_code != 200')
     except Exception as e:
         send_to_wecom('王者体验服监听服务异常！\n错误代码：\n' + str(e))
 
