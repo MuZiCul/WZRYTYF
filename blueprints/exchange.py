@@ -6,6 +6,7 @@ from blueprints.index import updateCookiesLog, updateCookiesStates
 from config.config import COOKIES_STATE_SUCCESS, COOKIES_STATE_OVERDUE, COOKIES_STATE_DEFICIT
 from config.exts import db
 from config.models import CookiesModel, UpdateLogModel
+from utils.serverchan import sc_send
 from utils.utils import send_to_wecom
 import re
 
@@ -75,6 +76,7 @@ def CheckWZRY():
                     data1 = json.loads(response.text[14:-1])['msg']['sContent']
                     data = etree.HTML(text=data1)
                     result = data.xpath('string(.)')
+                    sc_send('体验服又更新啦！', result)
                     msgList = []
                     if '更新时间' not in result:
                         msgList = reMsg(result, msgList)
@@ -84,9 +86,10 @@ def CheckWZRY():
                         send_to_wecom(i)
         else:
             send_to_wecom('王者体验服监听服务异常！response.status_code != 200')
+            sc_send('体验服监听服务异常！', '王者体验服监听服务异常！response.status_code != 200')
     except Exception as e:
         send_to_wecom('王者体验服监听服务异常！\n错误代码：\n' + str(e))
-
+        sc_send('体验服监听服务异常！', '错误代码：\n' + str(e))
 
 def extract_between_chars(s, start, end):
     idx1 = s.index(start)
