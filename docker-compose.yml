@@ -1,0 +1,13 @@
+version: '1.0'
+services:
+  wzry_server:
+    build: .
+    command: sh -c "ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo Asia/Shanghai > /etc/timezone && flask run --host=0.0.0.0"
+    container_name: wzry_server
+    ports:
+      - "5700:5000"
+    environment:
+      TZ: Asia/Shanghai
+      FLASK_APP: app.py
+      FLASK_ENV: development
+
