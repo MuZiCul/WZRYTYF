@@ -16,28 +16,17 @@ def getRandomLD(length):
 
 
 def send_to_wecom(msg):
-    wecom_cid = WECOM_CID
-    wecom_aid = WECOM_AID
-    wecom_secret = WECOM_SECRET
-    wecom_touid = WECOM_TOUID
-    get_token_url = f"https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={wecom_cid}&corpsecret={wecom_secret}"
-    response = requests.get(get_token_url).content
-    access_token = json.loads(response).get('access_token')
-    if access_token and len(access_token) > 0:
-        send_msg_url = f'https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={access_token}'
-        data = {
-            "touser": wecom_touid,
-            "agentid": wecom_aid,
-            "msgtype": "text",
-            "text": {
-                "content": msg
-            },
-            "duplicate_check_interval": 600
-        }
-        response = requests.post(send_msg_url, data=json.dumps(data)).content
-        return response
+    SECRET_KEY = 'j6nD4C-M9KPGFyaT4JrtbezVNZD-tFOLQHpf3Jj1bvO'
+    url = f"http://http://54.251.5.234:22818/message_transfer?msg={msg}&wecom_cid={WECOM_CID}&wecom_aid={WECOM_AID}&wecom_secret={WECOM_SECRET}&wecom_touid={WECOM_TOUID}&secret_key={SECRET_KEY}"
+
+    response = requests.post(url)
+
+    if response.status_code == 200:
+        print("请求发送成功！")
+        print("响应内容：", response.text)
     else:
-        return 0
+        print("请求发送失败！")
+        print("错误码：", response.status_code)
 
 
 def IsNull(obj):
