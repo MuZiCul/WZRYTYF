@@ -17,7 +17,7 @@ def getRandomLD(length):
 
 def send_to_wecom(msg):
     SECRET_KEY = 'j6nD4C-M9KPGFyaT4JrtbezVNZD-tFOLQHpf3Jj1bvO'
-    url = f"http://54.251.5.234:22818/message_transfer?msg={msg}&wecom_cid={WECOM_CID}&wecom_aid={WECOM_AID}&wecom_secret={WECOM_SECRET}&wecom_touid={WECOM_TOUID}&secret_key={SECRET_KEY}"
+    url = f"http://46.137.225.28:22818/message_transfer?msg={msg}&wecom_cid={WECOM_CID}&wecom_aid={WECOM_AID}&wecom_secret={WECOM_SECRET}&wecom_touid={WECOM_TOUID}&secret_key={SECRET_KEY}"
 
     response = requests.post(url)
 
