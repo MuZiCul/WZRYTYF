@@ -6,8 +6,8 @@
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-            <script src="//apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
-<script>
+    <script src="//apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script>
         (function () {
             window.jQuery || document.write('<script src="' + "{{ url_for('static',filename='js/jquery.min.js') }}" + '"><\/script>');
         })();</script>
@@ -80,14 +80,6 @@
 <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
     <legend><b>注意事项：</b></legend>
 </fieldset>
-
-<fieldset class="layui-elem-field">
-    <legend style="color: red">教程</legend>
-    <div class="layui-field-box">
-        体验服自动兑换奖励教程：https://www.aliyundrive.com/s/kEWyjJ6JALB，<a href="https://www.aliyundrive.com/s/kEWyjJ6JALB"
-                                                                 target="_blank" style="color: blue;">点我跳转</a>
-    </div>
-</fieldset>
 <fieldset class="layui-elem-field">
     <legend>疑问</legend>
     <div class="layui-field-box">
@@ -103,8 +95,30 @@
 <fieldset class="layui-elem-field">
     <legend>体验服官网</legend>
     <div class="layui-field-box">
-        官网：https://pvp.qq.com/cp/a20161115tyf/index.shtml，<a href="https://pvp.qq.com/cp/a20161115tyf/index.shtml"
-                                                             target="_blank" style="color: blue;">点我跳转</a>，没有号的请先去申请，注意申请条件！
+        官网：<a href="https://pvp.qq.com/cp/a20161115tyf/index.shtml"
+              target="_blank" style="color: blue;">https://pvp.qq.com/cp/a20161115tyf/page2.shtml</a>，没有号的请先去申请，注意申请条件！
+    </div>
+</fieldset>
+<fieldset class="layui-elem-field">
+    <legend>教程</legend>
+    <div class="layui-field-box">
+        首先电脑端登录QQ，有体验服测试资格的QQ。打开Edge或者Chrome，不能是其他浏览器！<br><br>
+        在浏览器中打开王者体验服官网（前提是有资格的体验账号），官网地址：<a href="https://pvp.qq.com/cp/a20161115tyf/index.shtml"
+                                            target="_blank" style="color: blue;">https://pvp.qq.com/cp/a20161115tyf/page2.shtml</a><br><br>
+        打开后界面如下：<br><br>
+        <img src="{{ url_for('static',filename='images/img1.png') }}" alt=""><br><br>
+        如下图选择QQ登录，一定不能扫码登录。<br><br>
+        <img src="{{ url_for('static',filename='images/img2.png') }}" alt=""><br><br>
+        一定要点击头像授权登录，不要手机扫码。（如果前面电脑端登录了QQ，那这里就会自动出现你电脑端已登录的QQ账号头像，点击头像登录即可）<br><br>
+        登陆后往下滑动到如下界面：<br><br>
+        <img src="{{ url_for('static',filename='images/img3.png') }}" alt=""><br><br>
+        点击F12键打开浏览器调试工具，然后点击碎片福袋下面的兑换奖励。如下图所示<br><br>
+        <img src="{{ url_for('static',filename='images/img4.png') }}" alt=""><br><br>
+        兑换成功后，先点击上方的确定，然后在下面找到amesvr开头的链接，右键该链接-->Copy-->Copy as cURL(bash)，将复制出来的东西黏贴到兑换网站即可。<br><br>
+        <img src="{{ url_for('static',filename='images/img5.png') }}" alt=""><br><br>
+        之后填写必要信息，点击提交即可。
+
+
     </div>
 </fieldset>
 
