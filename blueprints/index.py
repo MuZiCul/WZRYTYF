@@ -70,7 +70,7 @@ def curl2py(curl, wx, remarks):
             if IsNotNull(wx):
                 cookies_remarks = CookiesModel.query.filter_by(wx=wx).first()
                 if cookies_remarks and cookies_remarks.qq != qq:
-                    return jsonify({'code': 400, 'msg': '微信号被占用，请检查或更换！'})  # 待修改
+                    return jsonify({'code': 400, 'msg': '账号被占用，请检查或更换！'})  # 待修改
             # 解析出请求Url
             url_re_expression = re.compile("(http.*?)'", re.S)
             url_result_list = re.findall(url_re_expression, curl_result)
