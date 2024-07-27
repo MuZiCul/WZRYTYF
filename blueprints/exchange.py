@@ -91,6 +91,7 @@ def CheckWZRY():
         send_to_wecom('王者体验服监听服务异常！\n错误代码：\n' + str(e))
         sc_send('体验服监听服务异常！', '错误代码：\n' + str(e))
 
+
 def extract_between_chars(s, start, end):
     idx1 = s.index(start)
     idx2 = s.index(end)

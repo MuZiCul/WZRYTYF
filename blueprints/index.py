@@ -29,26 +29,24 @@ def get_curl():
             return jsonify({'code': 400, 'msg': 'curl格式有误'})
         wx = request.form.get('wx')
         remarks = request.form.get('remarks')
-        curl_re_expression = re.compile("curl(.*?)--compressed", re.S) or re.compile("curl(.*?)--insecure", re.S)
-        curl_result_list = re.findall(curl_re_expression, curl)
-        if curl_result_list:
-            return curl2py(curl_result_list, wx, remarks)
-        else:
-            return jsonify({'code': 400, 'msg': 'Curl似乎不对哦，请检查！'})
+        return curl2py(curl, wx, remarks)
     else:
         return jsonify({'code': 400, 'msg': '系统错误'})
 
 
-def curl2py(curl_result_list, wx, remarks):
+def curl2py(curl, wx, remarks):
     try:
-        if curl_result_list:
+        if curl:
+            curl_re_expression = re.compile("curl(.*?)--data-raw", re.S)
+            curl_result_list = re.findall(curl_re_expression, curl)
             curl_result = curl_result_list[0]
             # 解析QQ号
-            qq_re_expression = re.compile("ied_qq=(.*?);", re.S)
-            qq_result_list = re.findall(qq_re_expression, curl_result)
-            if IsNull(qq_result_list):
-                return jsonify({'code': 400, 'msg': 'Curl似乎不对哦，请检查！'})
-            qq = qq_result_list[0][1:]
+            qq_re_expression = re.compile("ams_qqopenid_(.*?);", re.S)
+            qq_result = re.findall(qq_re_expression, curl_result)[0]
+            qq_re_number = re.compile("%7C(.*?)%7C", re.S)
+            qq = re.findall(qq_re_number, qq_result)[0]
+            if IsNull(qq):
+                return jsonify({'code': 400, 'msg': '未解析到账号，Curl似乎不对哦，请检查！'})
             if IsNotNull(qq) and qq[0] == '0':
                 qq = qq[1:]
             type_ = TYPE_QQ
@@ -72,7 +70,7 @@ def curl2py(curl_result_list, wx, remarks):
             if IsNotNull(wx):
                 cookies_remarks = CookiesModel.query.filter_by(wx=wx).first()
                 if cookies_remarks and cookies_remarks.qq != qq:
-                    return jsonify({'code': 400, 'msg': '微信号被占用，请检查或更换！'})
+                    return jsonify({'code': 400, 'msg': '微信号被占用，请检查或更换！'})  # 待修改
             # 解析出请求Url
             url_re_expression = re.compile("(http.*?)'", re.S)
             url_result_list = re.findall(url_re_expression, curl_result)
@@ -92,7 +90,7 @@ def curl2py(curl_result_list, wx, remarks):
                     headers[key] = value
             # 解析data：
             data_re_expression = re.compile("--data-raw '(.*?)'", re.S)
-            data_result_list = re.findall(data_re_expression, curl_result)
+            data_result_list = re.findall(data_re_expression, curl)
             if IsNull(data_result_list):
                 return jsonify({'code': 400, 'msg': 'Curl似乎不对哦，请检查！'})
             data = unquote(data_result_list[0])
@@ -114,7 +112,7 @@ def curl2py(curl_result_list, wx, remarks):
                     updateCookiesStates(qq, COOKIES_STATE_SUCCESS)
                     updateCookiesLog(wx, type_, remarks, COOKIES_STATE_SUCCESS)
                     code = 200
-                elif '每天只能兑换一次该奖励' in response_msg:
+                elif '只能兑换一次该奖励' in response_msg:
                     msg = add_cookies(qq, wx, type_, url, headers, data_dict, remarks) + '，今日已兑换！'
                     code = 200
                 elif '体验币不足' in response_msg:

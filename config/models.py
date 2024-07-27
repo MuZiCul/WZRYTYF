@@ -16,6 +16,7 @@ class CookiesModel(db.Model):
     type = db.Column(db.Integer)
     states = db.Column(db.Integer)
     create_date = db.Column(db.DateTime, default=datetime.now)
+    update_date = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
 
 class CookiesLogModel(db.Model):
