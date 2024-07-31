@@ -14,39 +14,39 @@ import re
 def request_(url, headers, data):
     try:
         response = requests.post(url=url, headers=eval(headers), data=eval(data))
-        result = str(json.loads(response.text))
-        return response.status_code, result
+        json_data = json.loads(response.text)
+        result = json.loads(response.text).get('ret')
+        return int(result), json_data
     except Exception as e:
         send_to_wecom('体验服服务器异常，请检查！\n当前时间：' + str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + '\n错误详情：' + str(e))
-        return 400, '请求失败'
+        return 404
 
 
 def SkinDebris():
     cookies_list = CookiesModel.query.all()
     today = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     for cookies in cookies_list:
-        status_code, result = request_(cookies.url, cookies.headers, cookies.data)
-        if status_code != 400:
-            if '恭喜您获得了礼包' in result:
+        result, json_data = request_(cookies.url, cookies.headers, cookies.data)
+        if result != 404:
+            if 0 == result:
                 updateCookiesLog(cookies.qq, cookies.type, cookies.remarks, COOKIES_STATE_SUCCESS)
                 updateCookiesStates(cookies.qq, COOKIES_STATE_SUCCESS)
-                send_to_wecom(cookies.qq + '碎片兑换成功！请及时查收！\n当前时间：' + today)
-            elif '请先登录' in result:
+                send_to_wecom('账号：'+cookies.qq + '，碎片兑换成功！请及时查收！\n兑换时间：' + today)
+            elif 101 == result:
                 if cookies.states != COOKIES_STATE_OVERDUE:
                     updateCookiesLog(cookies.qq, cookies.type, cookies.remarks, COOKIES_STATE_OVERDUE)
                     updateCookiesStates(cookies.qq, COOKIES_STATE_OVERDUE)
-                    send_to_wecom(cookies.qq + '的cookies已过期，请及时更新！\n当前时间：' + today)
-            elif '体验币不足' in result:
+                    send_to_wecom('账号：'+cookies.qq + '，cookies已过期，请及时更新！\n当前时间：' + today)
+            elif '体验币不足' in str(json_data):
                 if cookies.states != COOKIES_STATE_DEFICIT:
                     updateCookiesLog(cookies.qq, cookies.type, cookies.remarks, COOKIES_STATE_DEFICIT)
                     updateCookiesStates(cookies.qq, COOKIES_STATE_DEFICIT)
-                    send_to_wecom(cookies.qq + '的体验币不足！\n当前时间：' + today)
-            elif '每天只能兑换一次该奖励' in result:
+                    send_to_wecom('账号：'+cookies.qq + '，体验币不足！\n当前时间：' + today)
+            elif 600 == result:
                 pass
 
 
 def CheckWZRY():
-    import datetime
     from lxml import etree
     headers_User_Agent = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:100.0) Gecko/20100101 Firefox/100.0',

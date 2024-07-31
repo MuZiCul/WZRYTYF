@@ -1,0 +1,18 @@
+{
+  "ret": "600",
+  "msg": "\u975e\u5e38\u62b1\u6b49\uff0c\u60a8\u7684\u8d44\u683c\u5df2\u7ecf\u7528\u5c3d\uff01",
+  "flowRet": {
+    "iRet": "600",
+    "sLogSerialNum": "AMS-YXZJ-0801020203-snqOFN-126433-407553",
+    "iAlertSerial": "0",
+    "sMsg": "\u4eb2\u7231\u7684\u53ec\u5524\u5e08\uff0c\u6bcf\u5929\u53ea\u80fd\u5151\u6362\u4e00\u6b21\u8be5\u5956\u52b1\u54e6"
+  },
+  "failedRet": {
+    "422971": {
+      "iRuleId": "422971",
+      "jRuleFailedInfo": {
+        "iFailedRet": 600
+      }
+    }
+  }
+}

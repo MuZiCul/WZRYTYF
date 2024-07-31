@@ -22,6 +22,11 @@ scheduler.init_app(app)
 scheduler.start()
 
 
+# @app.route('/110')
+# def favi():
+#     SkinDebris()
+
+
 @app.route('/favicon.ico')
 def favicon():
     return redirect(url_for('static', filename='images/logo.ico'))

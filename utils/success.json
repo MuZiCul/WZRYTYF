@@ -1,0 +1,53 @@
+{
+  "flowRet": {
+    "iRet": "0",
+    "sMsg": "MODULE OK",
+    "iAlertSerial": "0",
+    "sLogSerialNum": "AMS-YXZJ-0801015951-ZIycbu-126433-407553"
+  },
+  "modRet": {
+    "all_item_list": [],
+    "bHasSendFailItem": "0",
+    "bRealSendSucc": 0,
+    "dTimeNow": "2024-08-01 01:59:52",
+    "dtModuleCfgModifyTime": "2024-07-17 15:35:41",
+    "iActivityId": "375319",
+    "iDbPackageAutoIncId": 10624168,
+    "iLastMpResultCode": -9999999,
+    "iPackageGroupId": "",
+    "iPackageId": "2168687",
+    "iPackageIdCnt": "2168687:1",
+    "iPackageNum": "1",
+    "iReentry": 0,
+    "iRet": 0,
+    "iWecatCardResultCode": 0,
+    "isCmemReEntryOpen": "yes",
+    "jData": {
+      "iPackageId": "2168687",
+      "sPackageName": "英雄皮肤碎片福袋"
+    },
+    "jExtend": "",
+    "jReqParams": {
+      "iUin": "941D670B97A5DC34D77ECAA1DD643D7A",
+      "sAMSTimestamp": "1722448792",
+      "sArea": "1",
+      "sPartition": "1383"
+    },
+    "sAmsSerialNum": "AMS-YXZJ-0801015951-ZIycbu-126433-407553",
+    "sItemMsg": {
+      "2974854": ""
+    },
+    "sMidas2BCouponsRes": "null\n",
+    "sMidasCouponRes": "null\n",
+    "sMidasPresentRes": "null\n",
+    "sModuleCfgVersionMd5": "32be2fa2e05bffe382f52b055f753799",
+    "sMsg": "恭喜您获得了礼包： 英雄皮肤碎片福袋 , 请注意：游戏虚拟道具奖品将会在24小时内到账",
+    "sPackageCDkey": "",
+    "sPackageLimitCheckCode": "",
+    "sPackageName": "英雄皮肤碎片福袋",
+    "sPackageRealFlag": "0",
+    "sVersion": "V1.0.57db150.76a594d.20240729103944"
+  },
+  "ret": "0",
+  "msg": ""
+}
