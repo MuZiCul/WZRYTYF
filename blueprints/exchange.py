@@ -12,21 +12,21 @@ import re
 
 
 def request_(url, headers, data):
-    today = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     try:
         response = requests.post(url=url, headers=eval(headers), data=eval(data))
         result = str(json.loads(response.text))
-        return result, today
+        return response.status_code, result
     except Exception as e:
-        send_to_wecom('体验服服务器异常，请检查！\n当前时间：' + today + '\n错误详情：' + str(e))
-        return 0, today
+        send_to_wecom('体验服服务器异常，请检查！\n当前时间：' + str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + '\n错误详情：' + str(e))
+        return 400, '请求失败'
 
 
 def SkinDebris():
     cookies_list = CookiesModel.query.all()
+    today = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     for cookies in cookies_list:
-        result, today = request_(cookies.url, cookies.headers, cookies.data)
-        if result != 0:
+        status_code, result = request_(cookies.url, cookies.headers, cookies.data)
+        if status_code != 400:
             if '恭喜您获得了礼包' in result:
                 updateCookiesLog(cookies.qq, cookies.type, cookies.remarks, COOKIES_STATE_SUCCESS)
                 updateCookiesStates(cookies.qq, COOKIES_STATE_SUCCESS)
