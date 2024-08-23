@@ -27,6 +27,7 @@ def SkinDebris():
     today = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     for cookies in cookies_list:
         result, json_data = request_(cookies.url, cookies.headers, cookies.data)
+        # result == 900为礼品已发放完
         if result != 404:
             if 0 == result:
                 updateCookiesLog(cookies.qq, cookies.type, cookies.remarks, COOKIES_STATE_SUCCESS)

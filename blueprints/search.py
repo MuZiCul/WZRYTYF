@@ -8,6 +8,7 @@ from flask import Blueprint, render_template, request, jsonify, flash
 from sqlalchemy import and_
 
 from blueprints.exchange import request_
+from blueprints.index import curl2py
 from config.config import COOKIES_STATE_ADD, COOKIES_STATE_UPDATE, COOKIES_STATE_SUCCESS, COOKIES_STATE_DEFICIT, \
     COOKIES_STATE_OVERDUE, TYPE_WX, TYPE_QQ, COOKIES_STATE_PAUSE, COOKIES_STATE_START
 from config.exts import db
@@ -54,11 +55,11 @@ def search_key():
 @bp.route('/search_data', methods=['GET', 'POST'])
 def search_data():
     keyword = request.args.get('keyword')
-    result = CookiesLogModel.query.filter_by(qq=keyword).order_by(db.text('-create_date')).all()
+    result = CookiesLogModel.query.filter_by(wx=keyword).order_by(db.text('-create_date')).all()
     result = result if result else CookiesLogModel.query.filter_by(remarks=keyword).order_by(db.text('-create_date')).all()
     data_list = []
     for i in result:
-        dit = {'id': i.id, 'qq': i.qq, 'remarks': i.remarks, 'states': i.states,
+        dit = {'id': i.id, 'account': i.wx, 'remarks': i.remarks, 'states': i.states,
                'create_date': str(i.create_date) if i.create_date else '暂无信息', }
         data_list.append(dit)
     dic = {'code': 0, 'msg': 'SUCCESS', 'count': len(result), 'data': data_list}
@@ -74,7 +75,7 @@ def search_all_data():
     result = CookiesLogModel.query.order_by(db.text('-create_date')).all()
     data_list = []
     for i in result:
-        dit = {'id': i.id, 'qq': i.qq, 'remarks': i.remarks, 'states': i.states, 'type': i.type,
+        dit = {'id': i.id, 'account': i.wx, 'remarks': i.remarks, 'states': i.states, 'type': i.type,
                'create_date': str(i.create_date) if i.create_date else '暂无信息', }
         data_list.append(dit)
     dic = {'code': 0, 'msg': 'SUCCESS', 'count': len(result), 'data': data_list}
@@ -133,20 +134,104 @@ def get_type(num):
         return '未知'
 
 
-def get_cookies_state(num):
-    if num == COOKIES_STATE_ADD:
+def get_cookies_state(CODE):
+    if CODE == COOKIES_STATE_ADD:
         return '账号新增'
-    elif num == COOKIES_STATE_UPDATE:
+    elif CODE == COOKIES_STATE_UPDATE:
         return '账号更新'
-    elif num == COOKIES_STATE_OVERDUE:
+    elif CODE == COOKIES_STATE_OVERDUE:
         return 'Curl过期'
-    elif num == COOKIES_STATE_SUCCESS:
+    elif CODE == COOKIES_STATE_SUCCESS:
         return '兑换成功'
-    elif num == COOKIES_STATE_DEFICIT:
+    elif CODE == COOKIES_STATE_DEFICIT:
         return '体验币不足'
-    elif num == COOKIES_STATE_PAUSE:
+    elif CODE == COOKIES_STATE_PAUSE:
         return '暂停任务'
-    elif num == COOKIES_STATE_START:
-        return '开始任务'
+    elif CODE == COOKIES_STATE_START:
+        return '任务重启'
     else:
-        return '未知'
+        return '未知状态'
+
+
+@bp.route('/AcManageAllData', methods=['GET', 'POST'])
+def AcManageAllData():
+    return render_template('manage.html', keyword='All')
+
+
+@bp.route('/manage_data', methods=['GET', 'POST'])
+def manage_data():
+    keyword = request.args.get('keyword')
+    if keyword == 'All':
+        result = CookiesModel.query.order_by(db.text('-update_date')).all()
+    else:
+        result = CookiesModel.query.filter_by(wx=keyword).order_by(db.text('-create_date')).all()
+        result = result if result else CookiesModel.query.filter_by(remarks=keyword).order_by(
+            db.text('-create_date')).all()
+    data_list = []
+    for i in result:
+        dit = {'id': i.id, 'account': i.wx, 'remarks': i.remarks, 'states': i.states, 'type': i.type,
+               'create_date': str(i.create_date) if i.create_date else '暂无信息',
+               'update_date': str(i.update_date) if i.update_date else '暂无信息', }
+        data_list.append(dit)
+    dic = {'code': 0, 'msg': 'SUCCESS', 'count': len(result), 'data': data_list}
+    return json.dumps(dic, ensure_ascii=False)
+
+
+@bp.route('/account_pause', methods=['GET', 'POST'])
+def account_pause():
+    id_ = request.form.get('id_')
+    result = CookiesModel.query.filter_by(id=id_).first()
+    if result is not None:
+        result.states = 106
+        db.session.commit()
+        return jsonify({'code': 200, 'msg': '暂停成功'})
+    else:
+        return jsonify({'code': 400, 'msg': '暂停失败'})
+
+
+@bp.route('/account_del', methods=['GET', 'POST'])
+def account_del():
+    id_ = request.form.get('id_')
+    result = CookiesModel.query.filter_by(id=id_).first()
+    if result is not None:
+        db.session.delete(result)
+        db.session.commit()
+        return jsonify({'code': 200, 'msg': '删除成功'})
+    else:
+        return jsonify({'code': 400, 'msg': '删除失败'})
+
+
+@bp.route('/account_start', methods=['GET', 'POST'])
+def account_start():
+    id_ = request.form.get('id_')
+    result = CookiesModel.query.filter_by(id=id_).first()
+    if result is not None:
+        result.states = 107
+        db.session.commit()
+        return jsonify({'code': 200, 'msg': '重启成功'})
+    else:
+        return jsonify({'code': 400, 'msg': '重启失败'})
+
+
+@bp.route('/account_update', methods=['GET', 'POST'])
+def account_update():
+    if request.method == 'POST':
+        id_ = request.form.get('id_')
+        curl = request.form.get('cookies')
+        if IsNull(curl):
+            return jsonify({'code': 400, 'msg': 'curl格式有误'})
+        wx = request.form.get('wx')
+        remarks = request.form.get('remarks')
+        return curl2py(curl, wx, remarks)
+    else:
+        return jsonify({'code': 400, 'msg': '系统错误'})
+
+
+@bp.route('/manage_search', methods=['GET', 'POST'])
+def manage_search():
+    if request.method == 'GET':
+        keyword = request.args.get('keyword')
+        return render_template('manage.html', keyword=keyword)
+    else:
+        return render_template('index.html')
+

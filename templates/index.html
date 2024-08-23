@@ -72,6 +72,7 @@
         <div class="layui-input-block">
             <button type="submit" class="layui-btn">查询</button>
             <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            <a href="/AcManageAllData" class="layui-btn" >账号管理</a>
         </div>
     </div>
 </form>
@@ -125,7 +126,7 @@
 <script src="../static/layui/layui.js" charset="utf-8"></script>
 <!-- 注意：如果你直接复制所有代码到本地，上述 JS 路径需要改成你本地的 -->
 <script>
-    layui.use(['form', 'layedit', 'laydate'], function () {
+    layui.use(['form', 'laydate'], function () {
         const form = layui.form
             , layer = layui.layer;
         //监听提交

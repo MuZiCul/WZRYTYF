@@ -120,6 +120,11 @@ def curl2py(curl, wx, remarks):
                     updateCookiesStates(qq, COOKIES_STATE_DEFICIT)
                     updateCookiesLog(wx, type_, remarks, COOKIES_STATE_DEFICIT)
                     code = 200
+                elif '礼品已发放完' in response_msg:
+                    msg = add_cookies(qq, wx, type_, url, headers, data_dict, remarks) + '，皮肤碎片礼品已发放完！！'
+                    updateCookiesStates(qq, COOKIES_STATE_UPDATE)
+                    updateCookiesLog(wx, type_, remarks, COOKIES_STATE_UPDATE)
+                    code = 200
                 else:
                     msg = 'Cookies有误，请重新登陆后获取curl！'
                     code = 400
