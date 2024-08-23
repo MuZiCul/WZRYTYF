@@ -3,7 +3,7 @@ from datetime import datetime
 import requests
 
 from blueprints.index import updateCookiesLog, updateCookiesStates
-from config.config import COOKIES_STATE_SUCCESS, COOKIES_STATE_OVERDUE, COOKIES_STATE_DEFICIT
+from config.config import COOKIES_STATE_SUCCESS, COOKIES_STATE_OVERDUE, COOKIES_STATE_DEFICIT, COOKIES_STATE_PAUSE, COOKIES_STATE_START
 from config.exts import db
 from config.models import CookiesModel, UpdateLogModel
 from utils.serverchan import sc_send
@@ -24,27 +24,42 @@ def request_(url, headers, data):
 
 def SkinDebris():
     cookies_list = CookiesModel.query.all()
-    today = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     for cookies in cookies_list:
-        result, json_data = request_(cookies.url, cookies.headers, cookies.data)
-        # result == 900为礼品已发放完
-        if result != 404:
-            if 0 == result:
-                updateCookiesLog(cookies.qq, cookies.type, cookies.remarks, COOKIES_STATE_SUCCESS)
-                updateCookiesStates(cookies.qq, COOKIES_STATE_SUCCESS)
-                send_to_wecom('账号：'+cookies.qq + '，碎片兑换成功！请及时查收！\n兑换时间：' + today)
-            elif 101 == result:
-                if cookies.states != COOKIES_STATE_OVERDUE:
-                    updateCookiesLog(cookies.qq, cookies.type, cookies.remarks, COOKIES_STATE_OVERDUE)
-                    updateCookiesStates(cookies.qq, COOKIES_STATE_OVERDUE)
-                    send_to_wecom('账号：'+cookies.qq + '，cookies已过期，请及时更新！\n当前时间：' + today)
-            elif '体验币不足' in str(json_data):
-                if cookies.states != COOKIES_STATE_DEFICIT:
-                    updateCookiesLog(cookies.qq, cookies.type, cookies.remarks, COOKIES_STATE_DEFICIT)
-                    updateCookiesStates(cookies.qq, COOKIES_STATE_DEFICIT)
-                    send_to_wecom('账号：'+cookies.qq + '，体验币不足！\n当前时间：' + today)
-            elif 600 == result:
-                pass
+        if cookies.states in [COOKIES_STATE_OVERDUE, COOKIES_STATE_DEFICIT, COOKIES_STATE_PAUSE]:
+            if cookies.warn == 1:
+                continue
+            else:
+                exchange_task(cookies)
+        else:
+            exchange_task(cookies)
+
+
+def exchange_task(cookies):
+    today = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    result, json_data = request_(cookies.url, cookies.headers, cookies.data)
+    # result == 900为礼品已发放完
+    if result != 404:
+        if 0 == result:
+            updateCookiesLog(cookies.account, cookies.type, cookies.remarks, COOKIES_STATE_SUCCESS)
+            updateCookiesStates(cookies.account, COOKIES_STATE_SUCCESS, warn=0)
+            send_to_wecom('账号：' + cookies.account + '，碎片兑换成功！请及时查收！\n兑换时间：' + today)
+        elif 101 == result:
+            if cookies.states != COOKIES_STATE_OVERDUE:
+                updateCookiesLog(cookies.account, cookies.type, cookies.remarks, COOKIES_STATE_OVERDUE)
+                updateCookiesStates(cookies.account, COOKIES_STATE_OVERDUE, warn=1)
+                send_to_wecom('账号：' + cookies.account + '，cookies已过期，请及时更新！\n当前时间：' + today)
+        elif 900 == result:
+            if cookies.states != COOKIES_STATE_START:
+                updateCookiesLog(cookies.account, cookies.type, cookies.remarks, COOKIES_STATE_START)
+                updateCookiesStates(cookies.account, COOKIES_STATE_START, warn=1)
+                send_to_wecom('账号：' + cookies.account + '，今日礼品已发放完毕！\n当前时间：' + today)
+        elif '体验币不足' in str(json_data):
+            if cookies.states != COOKIES_STATE_DEFICIT:
+                updateCookiesLog(cookies.account, cookies.type, cookies.remarks, COOKIES_STATE_DEFICIT)
+                updateCookiesStates(cookies.account, COOKIES_STATE_DEFICIT, warn=1)
+                send_to_wecom('账号：' + cookies.account + '，体验币不足！\n当前时间：' + today)
+        elif 600 == result:
+            pass
 
 
 def CheckWZRY():
@@ -89,8 +104,8 @@ def CheckWZRY():
             send_to_wecom('王者体验服监听服务异常！response.status_code != 200')
             sc_send('体验服监听服务异常！', '王者体验服监听服务异常！response.status_code != 200')
     except Exception as e:
-        send_to_wecom('王者体验服监听服务异常！\n错误代码：\n' + str(e))
-        sc_send('体验服监听服务异常！', '错误代码：\n' + str(e))
+        send_to_wecom('王者体验服监听服务异常！\n错误详情：\n' + str(e))
+        sc_send('体验服监听服务异常！', '错误详情：\n' + str(e))
 
 
 def extract_between_chars(s, start, end):

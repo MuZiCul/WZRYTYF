@@ -55,11 +55,11 @@ def search_key():
 @bp.route('/search_data', methods=['GET', 'POST'])
 def search_data():
     keyword = request.args.get('keyword')
-    result = CookiesLogModel.query.filter_by(wx=keyword).order_by(db.text('-create_date')).all()
+    result = CookiesLogModel.query.filter_by(account=keyword).order_by(db.text('-create_date')).all()
     result = result if result else CookiesLogModel.query.filter_by(remarks=keyword).order_by(db.text('-create_date')).all()
     data_list = []
     for i in result:
-        dit = {'id': i.id, 'account': i.wx, 'remarks': i.remarks, 'states': i.states,
+        dit = {'id': i.id, 'account': i.account, 'remarks': i.remarks, 'states': i.states,
                'create_date': str(i.create_date) if i.create_date else '暂无信息', }
         data_list.append(dit)
     dic = {'code': 0, 'msg': 'SUCCESS', 'count': len(result), 'data': data_list}
@@ -75,7 +75,7 @@ def search_all_data():
     result = CookiesLogModel.query.order_by(db.text('-create_date')).all()
     data_list = []
     for i in result:
-        dit = {'id': i.id, 'account': i.wx, 'remarks': i.remarks, 'states': i.states, 'type': i.type,
+        dit = {'id': i.id, 'account': i.account, 'remarks': i.remarks, 'states': i.states, 'type': i.type,
                'create_date': str(i.create_date) if i.create_date else '暂无信息', }
         data_list.append(dit)
     dic = {'code': 0, 'msg': 'SUCCESS', 'count': len(result), 'data': data_list}
@@ -87,11 +87,11 @@ def get_exp_voucher(keyword):
     if IsNotNull(keyword):
         cookies = CookiesModel.query.filter_by(qq=keyword).first()
         cookies = cookies if cookies else CookiesModel.query.filter_by(remarks=keyword).first()
-        cookies = cookies if cookies else CookiesModel.query.filter_by(wx=keyword).first()
+        cookies = cookies if cookies else CookiesModel.query.filter_by(account=keyword).first()
         if cookies:
             result_log = CookiesLogModel.query.filter_by(qq=keyword).order_by(db.text('-create_date')).all()
             result_log = result_log if result_log else CookiesLogModel.query.filter_by(remarks=keyword).order_by(db.text('-create_date')).all()
-            result_log = result_log if result_log else CookiesLogModel.query.filter_by(wx=keyword).order_by(
+            result_log = result_log if result_log else CookiesLogModel.query.filter_by(account=keyword).order_by(
                 db.text('-create_date')).all()
             if result_log:
                 state = result_log[0].states
@@ -164,12 +164,12 @@ def manage_data():
     if keyword == 'All':
         result = CookiesModel.query.order_by(db.text('-update_date')).all()
     else:
-        result = CookiesModel.query.filter_by(wx=keyword).order_by(db.text('-create_date')).all()
+        result = CookiesModel.query.filter_by(account=keyword).order_by(db.text('-create_date')).all()
         result = result if result else CookiesModel.query.filter_by(remarks=keyword).order_by(
             db.text('-create_date')).all()
     data_list = []
     for i in result:
-        dit = {'id': i.id, 'account': i.wx, 'remarks': i.remarks, 'states': i.states, 'type': i.type,
+        dit = {'id': i.id, 'account': i.account, 'remarks': i.remarks, 'states': i.states, 'type': i.type,
                'create_date': str(i.create_date) if i.create_date else '暂无信息',
                'update_date': str(i.update_date) if i.update_date else '暂无信息', }
         data_list.append(dit)
@@ -217,12 +217,11 @@ def account_start():
 def account_update():
     if request.method == 'POST':
         id_ = request.form.get('id_')
+        result = CookiesModel.query.filter_by(id=id_).first()
         curl = request.form.get('cookies')
         if IsNull(curl):
-            return jsonify({'code': 400, 'msg': 'curl格式有误'})
-        wx = request.form.get('wx')
-        remarks = request.form.get('remarks')
-        return curl2py(curl, wx, remarks)
+            return jsonify({'code': 400, 'msg': 'curl为空，请检查！'})
+        return curl2py(curl, result.account, result.remarks)
     else:
         return jsonify({'code': 400, 'msg': '系统错误'})
 
