@@ -8,7 +8,7 @@ from flask import Blueprint, render_template, request, jsonify, flash
 from sqlalchemy import and_
 
 from config.config import COOKIES_STATE_ADD, COOKIES_STATE_UPDATE, COOKIES_STATE_SUCCESS, COOKIES_STATE_DEFICIT, \
-    COOKIES_STATE_OVERDUE, TYPE_WX, TYPE_QQ
+    COOKIES_STATE_OVERDUE, TYPE_WX, TYPE_QQ, COOKIES_STATE_ENDED
 from config.exts import db
 from config.models import CookiesModel, CookiesLogModel
 from utils.utils import IsNull, IsNotNull
@@ -105,26 +105,35 @@ def curl2py(curl, wx, remarks):
             response = requests.post(url, headers=headers, data=data_dict)
             response_msg = str(json.loads(response.text))
             if '请先登录' in response_msg:
-                msg = 'Cookies已过期，请重新登陆后获取curl'
+                msg = 'Cookies已过期，请重新登陆后获取curl！'
                 code = 400
             else:
                 if '恭喜您获得了礼包' in response_msg:
-                    msg = add_cookies(account, account, type_, url, headers, data_dict, remarks) + '，今日兑换成功！'
-                    updateCookiesStates(account, COOKIES_STATE_SUCCESS, warn=0)
-                    updateCookiesLog(account, type_, remarks, COOKIES_STATE_SUCCESS)
+                    state = COOKIES_STATE_SUCCESS
+                    msg = add_cookies(account, account, type_, url, headers, data_dict, remarks, state) + \
+                          '，今日兑换成功！'
+                    updateCookiesStates(account, state, warn=state)
+                    updateCookiesLog(account, type_, remarks, state)
                     code = 200
                 elif '只能兑换一次该奖励' in response_msg:
-                    msg = add_cookies(account, account, type_, url, headers, data_dict, remarks) + '，今日已兑换！'
+                    state = COOKIES_STATE_SUCCESS
+                    msg = add_cookies(account, account, type_, url, headers, data_dict, remarks, state) + \
+                          '，今日已兑换！'
+                    updateCookiesStates(account, state, warn=state)
                     code = 200
                 elif '体验币不足' in response_msg:
-                    msg = add_cookies(account, account, type_, url, headers, data_dict, remarks) + '，体验币不足！！'
-                    updateCookiesStates(account, COOKIES_STATE_DEFICIT, warn=1)
-                    updateCookiesLog(account, type_, remarks, COOKIES_STATE_DEFICIT)
+                    state = COOKIES_STATE_DEFICIT
+                    msg = add_cookies(account, account, type_, url, headers, data_dict, remarks, state) + \
+                          '，账号体验币不足！'
+                    updateCookiesStates(account, state, warn=state)
+                    updateCookiesLog(account, type_, remarks, state)
                     code = 200
                 elif '礼品已发放完' in response_msg:
-                    msg = add_cookies(account, account, type_, url, headers, data_dict, remarks) + '，皮肤碎片礼品已发放完！！'
-                    updateCookiesStates(account, COOKIES_STATE_UPDATE, warn=0)
-                    updateCookiesLog(account, type_, remarks, COOKIES_STATE_UPDATE)
+                    state = COOKIES_STATE_ENDED
+                    msg = add_cookies(account, account, type_, url, headers, data_dict, remarks, state) + \
+                          '，今日皮肤碎片礼品已发放完！'
+                    updateCookiesStates(account, state, warn=state)
+                    updateCookiesLog(account, type_, remarks, state)
                     code = 200
                 else:
                     msg = 'Cookies有误，请重新登陆后获取curl！'
@@ -137,17 +146,17 @@ def curl2py(curl, wx, remarks):
         return jsonify({'code': 400, 'msg': 'Cookies有误，请重新登陆后获取curl，错误代码：' + str(e)})
 
 
-def add_cookies(qq, account, type_, url, headers, data_dict, remarks):
+def add_cookies(qq, account, type_, url, headers, data_dict, remarks, state):
     headers_data = str(headers)
     data_data = str(data_dict)
     cookies = CookiesModel.query.filter_by(qq=qq).first()
     if not cookies:
         cookies_model = CookiesModel(qq=qq, account=account, url=url, headers=headers_data,
-                                     data=data_data, type=type_, remarks=remarks, states=COOKIES_STATE_ADD)
+                                     data=data_data, type=type_, remarks=remarks, states=state)
         db.session.add(cookies_model)
         db.session.commit()
-        updateCookiesLog(account, type_, remarks, COOKIES_STATE_ADD)
-        return '已添加'
+        updateCookiesLog(account, type_, remarks, state)
+        return '账号添加成功！'
     else:
         cookies.url = url
         cookies.headers = headers_data
@@ -155,10 +164,10 @@ def add_cookies(qq, account, type_, url, headers, data_dict, remarks):
         cookies.account = account
         cookies.remarks = remarks
         cookies.type = type_
-        cookies.states = COOKIES_STATE_UPDATE
+        cookies.states = state
         db.session.commit()
-        updateCookiesLog(account, type_, remarks, COOKIES_STATE_UPDATE)
-        return '已更新'
+        updateCookiesLog(account, type_, remarks, state)
+        return '账号更新成功！'
 
 
 def updateCookiesLog(qq, type_, remarks, states):
