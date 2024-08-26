@@ -30,7 +30,7 @@ def SkinDebris():
         if cookies.states not in [COOKIES_STATE_OVERDUE, COOKIES_STATE_DEFICIT, COOKIES_STATE_PAUSE]:
             exchange_task(cookies, wecom_list)
     wecom_msg = ''
-    if wecom_list is not None:
+    if len(wecom_list) > 0:
         for index, wecom in enumerate(wecom_list):
             wecom_msg += f'{index}：{wecom}\n'
         send_to_wecom('当前时间：'+today+'\n'+wecom_msg)
