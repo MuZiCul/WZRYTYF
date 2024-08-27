@@ -32,7 +32,7 @@ def SkinDebris():
     wecom_msg = ''
     if len(wecom_list) > 0:
         for index, wecom in enumerate(wecom_list):
-            wecom_msg += f'{index}：{wecom}\n'
+            wecom_msg += f'账号{index}：{wecom}\n'
         send_to_wecom('当前时间：'+today+'\n'+wecom_msg)
 
 
@@ -46,7 +46,7 @@ def exchange_task(cookies, wecom_list):
             updateCookiesStates(cookies.account, state, warn=state)
             cookies.warn = state
             db.session.commit()
-            wecom_list.append('账号：' + cookies.account + '，碎片兑换成功！请及时查收！')
+            wecom_list.append(cookies.account + '，兑换成功！')
         elif 101 == result:
             state = COOKIES_STATE_OVERDUE
             if cookies.states != state:
@@ -55,14 +55,14 @@ def exchange_task(cookies, wecom_list):
                 if cookies.warn != state:
                     cookies.warn = state
                     db.session.commit()
-                    wecom_list.append('账号：' + cookies.account + '，cookies已过期，请及时更新！')
+                    wecom_list.append(cookies.account + '，cookies过期！')
         elif 900 == result:
             state = COOKIES_STATE_ENDED
             if cookies.states != state:
                 updateCookiesLog(cookies.account, cookies.type, cookies.remarks, state)
                 updateCookiesStates(cookies.account, state, warn=state)
                 if cookies.warn != state:
-                    wecom_list.append('账号：' + cookies.account + '，今日礼品已发放完毕！')
+                    wecom_list.append(cookies.account + '，礼物兑完！')
                     cookies.warn = state
                     db.session.commit()
         elif '体验币不足' in str(json_data):
@@ -71,7 +71,7 @@ def exchange_task(cookies, wecom_list):
                 updateCookiesLog(cookies.account, cookies.type, cookies.remarks, state)
                 updateCookiesStates(cookies.account, state, warn=state)
                 if cookies.warn != state:
-                    wecom_list.append('账号：' + cookies.account + '，体验币不足！')
+                    wecom_list.append(cookies.account + '，体验币不足！')
                     cookies.warn = state
                     db.session.commit()
         elif 600 == result:
