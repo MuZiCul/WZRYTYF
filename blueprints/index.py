@@ -170,25 +170,25 @@ def add_cookies(qq, account, type_, url, headers, data_dict, remarks, state):
         return '账号更新成功！'
 
 
-def updateCookiesLog(qq, type_, remarks, states, exp):
+def updateCookiesLog(account, type_, remarks, states, exp):
     if states == COOKIES_STATE_OVERDUE:
         cookies_OVERDUE = CookiesLogModel.query.filter(
-            and_(CookiesLogModel.qq == qq, CookiesLogModel.states == COOKIES_STATE_OVERDUE,
+            and_(CookiesLogModel.account == account, CookiesLogModel.states == COOKIES_STATE_OVERDUE,
                  db.cast(CookiesLogModel.create_date, db.DATE) == db.cast(datetime.now(), db.DATE))).all()
         if not cookies_OVERDUE:
-            updateCookiesLog_(qq, type_, remarks, states, exp)
+            updateCookiesLog_(account, type_, remarks, states, exp)
     elif states == COOKIES_STATE_DEFICIT:
         cookies_DEFICIT = CookiesLogModel.query.filter(
-            and_(CookiesLogModel.qq == qq, CookiesLogModel.states == COOKIES_STATE_DEFICIT,
+            and_(CookiesLogModel.account == account, CookiesLogModel.states == COOKIES_STATE_DEFICIT,
                  db.cast(CookiesLogModel.create_date, db.DATE) == db.cast(datetime.now(), db.DATE))).all()
         if not cookies_DEFICIT:
-            updateCookiesLog_(qq, type_, remarks, states, exp)
+            updateCookiesLog_(account, type_, remarks, states, exp)
     else:
-        updateCookiesLog_(qq, type_, remarks, states, exp)
+        updateCookiesLog_(account, type_, remarks, states, exp)
 
 
-def updateCookiesLog_(qq, type_, remarks, states, exp):
-    cookies_log_model = CookiesLogModel(qq=qq, type=type_, remarks=remarks, states=states, exp=exp)
+def updateCookiesLog_(account, type_, remarks, states, exp):
+    cookies_log_model = CookiesLogModel(account=account, type=type_, remarks=remarks, states=states, exp=exp)
     db.session.add(cookies_log_model)
     db.session.commit()
 
