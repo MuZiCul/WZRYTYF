@@ -27,7 +27,7 @@ def SkinDebris():
     today = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     wecom_list = []
     for cookies in cookies_list:
-        if cookies.states not in [COOKIES_STATE_OVERDUE, COOKIES_STATE_DEFICIT, COOKIES_STATE_PAUSE]:
+        if cookies.states not in [COOKIES_STATE_OVERDUE, COOKIES_STATE_PAUSE]:
             exchange_task(cookies, wecom_list)
     wecom_msg = ''
     if len(wecom_list) > 0:
