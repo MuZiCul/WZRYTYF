@@ -36,14 +36,24 @@
     </div>
     <div class="layui-form-item">
         <label class="layui-form-label">微信号：</label>
-        <div class="layui-input-block">
-            <input type="text" name="wx" placeholder="如果是微信区请在此处填写微信号，QQ区不填" maxlength="20" class="layui-input">
+        <div class="layui-input-group">
+            <input type="text" name="wx" placeholder="微信号" maxlength="20" class="layui-input">
+            <div class="layui-input-suffix layui-text-em">
+
+        <i class="layui-icon layui-icon-tips"></i> 如果是微信区请在此处填写微信号，QQ区不填
+
+      </div>
         </div>
     </div>
     <div class="layui-form-item">
         <label class="layui-form-label">备注：</label>
-        <div class="layui-input-block">
-            <input type="text" name="remarks" placeholder="用来方便以后查询，可不填" maxlength="20" class="layui-input">
+        <div class="layui-input-group">
+            <input type="text" name="remarks" placeholder="备注" maxlength="20" class="layui-input">
+            <div class="layui-input-suffix layui-text-em">
+
+        <i class="layui-icon layui-icon-tips"></i> 用来方便以后查询，可不填
+
+      </div>
         </div>
     </div>
     <div class="layui-form-item">
@@ -61,11 +71,16 @@
 
 <form class="layui-form" action="/search" onsubmit="return CheckKeyword('search')">
     <div class="layui-form-item">
-        <label class="layui-form-label">QQ号/WX号/备注：</label>
-        <div class="layui-input-block">
-            <input type="text" id="search_keyword" name="keyword" lay-verify="required" lay-reqtext="请输入查询关键字！"
+        <label class="layui-form-label">关键字：</label>
+        <div class="layui-input-group">
+            <input type="text" id="search_keyword" name="keyword" lay-verify="required" lay-reqtext="请输入查询关键字，QQ号或微信号或备注！"
                    maxlength="20"
-                   placeholder="请输入要查询的QQ号或微信号或备注" class="layui-input">
+                   placeholder="QQ号或微信号或备注" class="layui-input">
+            <div class="layui-input-suffix layui-text-em">
+
+        <i class="layui-icon layui-icon-tips"></i> 请输入查询关键字，QQ号或微信号或备注！
+
+      </div>
         </div>
     </div>
     <div class="layui-form-item">

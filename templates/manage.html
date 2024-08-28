@@ -20,11 +20,16 @@
 </fieldset>
 <form class="layui-form" action="/manage_search" onsubmit="return CheckKeyword('search')">
     <div class="layui-form-item">
-        <label class="layui-form-label">QQ号/WX号/备注：</label>
-        <div class="layui-input-block">
-            <input type="text" id="search_keyword" name="keyword" lay-verify="required" lay-reqtext="请输入查询关键字！"
+        <label class="layui-form-label">关键字：</label>
+        <div class="layui-input-group">
+            <input type="text" id="search_keyword" name="keyword" lay-verify="required" lay-reqtext="请输入查询关键字，QQ号或微信号或备注！"
                    maxlength="20"
-                   placeholder="请输入要查询的QQ号或微信号或备注" class="layui-input">
+                   placeholder="QQ号或微信号或备注" class="layui-input">
+            <div class="layui-input-suffix layui-text-em">
+
+        <i class="layui-icon layui-icon-tips"></i> 请输入查询关键字，QQ号或微信号或备注！
+
+      </div>
         </div>
     </div>
     <div class="layui-form-item">
@@ -75,7 +80,7 @@
                     }
                 }
                 , {
-                    field: 'states', title: '状态', align: 'center', sort: true, templet: function (res) {
+                    field: 'states', title: '状态', align: 'center', minWidth: 130, sort: true, templet: function (res) {
                         switch (res.states) {
                             case 101:
                                 return '<span style="color: #8B2323;">账号新增</span>'
@@ -91,16 +96,34 @@
                                 return '<span style="color: #A020F0;">暂停兑换</span> <a class="layui-btn layui-bg-orange layui-btn-xs" lay-event="START">重启</a>'
                             case 107:
                                 return '<span style="color: #A020F0;">任务重启</span>'
+                            case 801:
+                                return '<span style="color: #8B2323;">账号新增</span>'
+                            case 802:
+                                return '<span style="color: #0000CD;">账号更新</span>'
+                            case 803:
+                                return '<span style="color: #A020F0;">Curl过期</span> <a class="layui-btn layui-bg-blue layui-btn-xs" lay-event="UPDATE">更新</a>'
+                            case 804:
+                                return '<span style="color: #A020F0;">兑换成功</span>'
+                            case 805:
+                                return '<span style="color: #A020F0;">余额不足</span>'
+                            case 806:
+                                return '<span style="color: #A020F0;">暂停兑换</span> <a class="layui-btn layui-bg-orange layui-btn-xs" lay-event="START">重启</a>'
+                            case 807:
+                                return '<span style="color: #A020F0;">任务重启</span>'
+                            case 808:
+                                return '<span style="color: #A020F0;">今日发完</span>'
                             default:
                                 return res.states
 
                         }
                     }
                 }
+                , {field: 'exp', title: '余额', align: 'center'}
+                , {field: 'score', title: '积分', align: 'center'}
                 , {field: 'create_date', title: '创建时间', align: 'center', sort: true}
                 , {field: 'update_date', title: '更新时间', align: 'center', sort: true}
                 , {field: 'remarks', title: '备注', align: 'center'}
-                , {fixed: 'right', title: '管理', toolbar: '#barDemo', align: 'center', minWidth: 142}
+                , {fixed: 'right', title: '管理', toolbar: '#barDemo', align: 'center', minWidth: 200}
             ]]
         });
         //监听行工具事件

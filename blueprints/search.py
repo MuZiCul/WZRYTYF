@@ -7,10 +7,10 @@ import requests
 from flask import Blueprint, render_template, request, jsonify, flash
 from sqlalchemy import and_
 
-from blueprints.exchange import request_
+from blueprints.exchange import request_, get_exp
 from blueprints.index import curl2py
 from config.config import COOKIES_STATE_ADD, COOKIES_STATE_UPDATE, COOKIES_STATE_SUCCESS, COOKIES_STATE_DEFICIT, \
-    COOKIES_STATE_OVERDUE, TYPE_WX, TYPE_QQ, COOKIES_STATE_PAUSE, COOKIES_STATE_START
+    COOKIES_STATE_OVERDUE, TYPE_WX, TYPE_QQ, COOKIES_STATE_PAUSE, COOKIES_STATE_START, COOKIES_STATE_ENDED
 from config.exts import db
 from config.models import CookiesModel, CookiesLogModel
 from utils.utils import IsNull, IsNotNull
@@ -83,26 +83,17 @@ def search_all_data():
 
 
 def get_exp_voucher(keyword):
-    exp_voucher, state, type_ = '未知', '未知', '未知'
+    exp, state, type_ = '未知', '未知', '未知'
     if IsNotNull(keyword):
         cookies = CookiesModel.query.filter_by(qq=keyword).first()
         cookies = cookies if cookies else CookiesModel.query.filter_by(remarks=keyword).first()
         cookies = cookies if cookies else CookiesModel.query.filter_by(account=keyword).first()
-        if cookies:
-            result_log = CookiesLogModel.query.filter_by(qq=keyword).order_by(db.text('-create_date')).all()
-            result_log = result_log if result_log else CookiesLogModel.query.filter_by(remarks=keyword).order_by(db.text('-create_date')).all()
-            result_log = result_log if result_log else CookiesLogModel.query.filter_by(account=keyword).order_by(
-                db.text('-create_date')).all()
-            if result_log:
-                state = result_log[0].states
-                type_ = result_log[0].type
-            if state != COOKIES_STATE_OVERDUE:
-                result, json_data = request_(cookies.url, cookies.headers, str(get_exp_voucher_data(eval(cookies.data), type_)))
-                try:
-                    exp_voucher = eval(json_data).get('modRet').get('jData').get('exp_voucher')
-                except Exception as e:
-                    exp_voucher = '未知'
-    return exp_voucher, get_cookies_state(state), get_type(type_)
+        state = cookies.states
+        type_ = cookies.type
+        if state != COOKIES_STATE_OVERDUE:
+            result, json_data, exp = request_(cookies.account, cookies.url, cookies.headers,
+                                              str(get_exp_voucher_data(eval(cookies.data), type_)))
+    return exp, get_cookies_state(state), get_type(type_)
 
 
 def get_exp_voucher_data(data_, type_):
@@ -144,11 +135,13 @@ def get_cookies_state(CODE):
     elif CODE == COOKIES_STATE_SUCCESS:
         return '兑换成功'
     elif CODE == COOKIES_STATE_DEFICIT:
-        return '体验币不足'
+        return '余额不足'
     elif CODE == COOKIES_STATE_PAUSE:
         return '暂停任务'
     elif CODE == COOKIES_STATE_START:
         return '任务重启'
+    elif CODE == COOKIES_STATE_ENDED:
+        return '今日发完'
     else:
         return '未知状态'
 
@@ -169,9 +162,10 @@ def manage_data():
             db.text('-create_date')).all()
     data_list = []
     for i in result:
+        exp, expscore = get_exp(i.account)
         dit = {'id': i.id, 'account': i.account, 'remarks': i.remarks, 'states': i.states, 'type': i.type,
-               'create_date': str(i.create_date) if i.create_date else '暂无信息',
-               'update_date': str(i.update_date) if i.update_date else '暂无信息', }
+               'create_date': str(i.create_date) if i.create_date else '暂无信息', 'score': expscore,
+               'update_date': str(i.update_date) if i.update_date else '暂无信息', 'exp': exp}
         data_list.append(dit)
     dic = {'code': 0, 'msg': 'SUCCESS', 'count': len(result), 'data': data_list}
     return json.dumps(dic, ensure_ascii=False)

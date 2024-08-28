@@ -11,15 +11,16 @@ from utils.utils import send_to_wecom
 import re
 
 
-def request_(url, headers, data):
+def request_(account, url, headers, data):
     try:
+        exp, expscore = get_exp(account)
         response = requests.post(url=url, headers=eval(headers), data=eval(data))
         json_data = json.loads(response.text)
         result = json.loads(response.text).get('ret')
-        return int(result), json_data
+        return int(result), json_data, exp
     except Exception as e:
         send_to_wecom('体验服服务器异常，请检查！\n当前时间：' + str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + '\n错误详情：' + str(e))
-        return 404
+        return 404, None, None
 
 
 def SkinDebris():
@@ -27,7 +28,7 @@ def SkinDebris():
     today = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     wecom_list = []
     for cookies in cookies_list:
-        if cookies.states not in [COOKIES_STATE_OVERDUE, COOKIES_STATE_PAUSE]:
+        if cookies.states not in [COOKIES_STATE_PAUSE]:
             exchange_task(cookies, wecom_list)
     wecom_msg = ''
     if len(wecom_list) > 0:
@@ -37,43 +38,40 @@ def SkinDebris():
 
 
 def exchange_task(cookies, wecom_list):
-    result, json_data = request_(cookies.url, cookies.headers, cookies.data)
+    result, json_data, exp = request_(cookies.account, cookies.url, cookies.headers, cookies.data)
     # result == 900为礼品已发放完
     if result != 404:
         if 0 == result:
             state = COOKIES_STATE_SUCCESS
-            updateCookiesLog(cookies.account, cookies.type, cookies.remarks, state)
+            updateCookiesLog(cookies.account, cookies.type, cookies.remarks, state, exp)
             updateCookiesStates(cookies.account, state, warn=state)
             cookies.warn = state
             db.session.commit()
-            wecom_list.append(cookies.account + '，兑换成功！')
+            wecom_list.append(cookies.account + '，兑换成功！余额：'+exp)
         elif 101 == result:
             state = COOKIES_STATE_OVERDUE
             if cookies.states != state:
-                updateCookiesLog(cookies.account, cookies.type, cookies.remarks, state)
+                updateCookiesLog(cookies.account, cookies.type, cookies.remarks, state, exp)
                 updateCookiesStates(cookies.account, state, warn=state)
-                if cookies.warn != state:
-                    cookies.warn = state
-                    db.session.commit()
-                    wecom_list.append(cookies.account + '，cookies过期！')
+                cookies.warn = state
+                db.session.commit()
+                wecom_list.append(cookies.account + '，cookies过期！')
         elif 900 == result:
             state = COOKIES_STATE_ENDED
             if cookies.states != state:
-                updateCookiesLog(cookies.account, cookies.type, cookies.remarks, state)
+                updateCookiesLog(cookies.account, cookies.type, cookies.remarks, state, exp)
                 updateCookiesStates(cookies.account, state, warn=state)
-                if cookies.warn != state:
-                    wecom_list.append(cookies.account + '，礼物兑完！')
-                    cookies.warn = state
-                    db.session.commit()
+                wecom_list.append(cookies.account + '，礼物兑完！余额：'+exp)
+                cookies.warn = state
+                db.session.commit()
         elif '体验币不足' in str(json_data):
             state = COOKIES_STATE_DEFICIT
             if cookies.states != state:
-                updateCookiesLog(cookies.account, cookies.type, cookies.remarks, state)
+                updateCookiesLog(cookies.account, cookies.type, cookies.remarks, state, exp)
                 updateCookiesStates(cookies.account, state, warn=state)
-                if cookies.warn != state:
-                    wecom_list.append(cookies.account + '，体验币不足！')
-                    cookies.warn = state
-                    db.session.commit()
+                wecom_list.append(cookies.account + '，体验币不足！余额：'+exp)
+                cookies.warn = state
+                db.session.commit()
         elif 600 == result:
             cookies.warn = COOKIES_STATE_SUCCESS
             db.session.commit()
@@ -170,3 +168,18 @@ def find_last_keyword_position(s):
         if not matches and matches1:
             return matches1[-1].start()
         return None
+
+
+def get_exp(account):
+    cookies = CookiesModel.query.filter_by(account=account).first()
+    url = 'https://smoba.ams.game.qq.com/ams/ame/amesvr?ameVersion=0.3&sServiceType=yxzjtest&iActivityId=126433&sServiceDepartment=group_b&sSDID=cc1ddbcfd6e307471b5e73e28c6ff10c&sMiloTag=AMS-MILO-126433-407548-7FC45CD9C1C78D9600CFA1A9EDC2312D-1724830023673-q4rB4x&isXhrPost=true'
+    headers = cookies.headers
+    data = cookies.data1
+    try:
+        response = requests.post(url=url, headers=eval(headers), data=eval(data))
+        json_data = json.loads(response.text)
+        exp_voucher = json_data.get('modRet').get('jData').get('exp_voucher')
+        expscore = json_data.get('modRet').get('jData').get('expscore')
+        return exp_voucher, expscore
+    except Exception as e:
+        return -1, -1
