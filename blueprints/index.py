@@ -6,6 +6,8 @@ from urllib.parse import unquote
 import requests
 from flask import Blueprint, render_template, request, jsonify
 from sqlalchemy import and_
+
+from blueprints.exchange import CheckWZRY
 from config.config import COOKIES_STATE_ADD, COOKIES_STATE_UPDATE, COOKIES_STATE_SUCCESS, COOKIES_STATE_DEFICIT, \
     COOKIES_STATE_OVERDUE, TYPE_WX, TYPE_QQ, COOKIES_STATE_ENDED, COOKIES_STATE_PAUSE
 from config.exts import db
@@ -202,6 +204,7 @@ def updateCookiesStates(account, states_, warn):
 
 @bp.route('/test', methods=['GET', 'POST'])
 def test():
+    CheckWZRY()
     return render_template('search.html', qq='898621235')
 
 
