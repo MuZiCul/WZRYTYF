@@ -5,7 +5,7 @@ import requests
 from blueprints.index import updateCookiesLog, updateCookiesStates
 from config.config import COOKIES_STATE_SUCCESS, COOKIES_STATE_OVERDUE, COOKIES_STATE_DEFICIT, COOKIES_STATE_PAUSE, COOKIES_STATE_START, COOKIES_STATE_ENDED
 from config.exts import db
-from config.models import CookiesModel, UpdateLogModel
+from config.models import CookiesModel, UpdateLogModel, ArgumentsModel
 from utils.serverchan import sc_send
 from utils.utils import send_to_wecom
 import re
@@ -33,8 +33,8 @@ def SkinDebris():
     wecom_msg = ''
     if len(wecom_list) > 0:
         for index, wecom in enumerate(wecom_list):
-            wecom_msg += f'账号{index}：{wecom}\n'
-        send_to_wecom('当前时间：'+today+'\n'+wecom_msg)
+            wecom_msg += f'A{index}：{wecom}\n'
+        send_to_wecom('Time：'+today+'\n'+wecom_msg)
 
 
 def exchange_task(cookies, wecom_list):
@@ -44,15 +44,15 @@ def exchange_task(cookies, wecom_list):
         if 0 == result:
             state = COOKIES_STATE_SUCCESS
             updateCookiesLog(cookies.account, cookies.type, cookies.remarks, state, exp)
-            updateCookiesStates(cookies.account, state, warn=state)
+            updateCookiesStates(cookies.account, state, warn=0)
             cookies.warn = state
             db.session.commit()
-            wecom_list.append(cookies.account + '，兑换成功！余额：'+exp)
+            wecom_list.append(cookies.account + '，Success！Exp：'+exp)
         elif 101 == result:
             state = COOKIES_STATE_OVERDUE
-            if cookies.states != state:
+            if cookies.warn < 3:
                 updateCookiesLog(cookies.account, cookies.type, cookies.remarks, state, exp)
-                updateCookiesStates(cookies.account, state, warn=state)
+                updateCookiesStates(cookies.account, state, warn=cookies.warn+1)
                 cookies.warn = state
                 db.session.commit()
                 wecom_list.append(cookies.account + '，cookies过期！')
@@ -60,16 +60,16 @@ def exchange_task(cookies, wecom_list):
             state = COOKIES_STATE_ENDED
             if cookies.states != state:
                 updateCookiesLog(cookies.account, cookies.type, cookies.remarks, state, exp)
-                updateCookiesStates(cookies.account, state, warn=state)
-                wecom_list.append(cookies.account + '，礼物兑完！余额：'+exp)
+                updateCookiesStates(cookies.account, state, warn=0)
+                wecom_list.append(cookies.account + '，礼物兑完！Exp：'+exp)
                 cookies.warn = state
                 db.session.commit()
         elif '体验币不足' in str(json_data):
             state = COOKIES_STATE_DEFICIT
-            if cookies.states != state:
+            if cookies.warn < 3:
                 updateCookiesLog(cookies.account, cookies.type, cookies.remarks, state, exp)
-                updateCookiesStates(cookies.account, state, warn=state)
-                wecom_list.append(cookies.account + '，体验币不足！余额：'+exp)
+                updateCookiesStates(cookies.account, state, warn=cookies.warn+1)
+                wecom_list.append(cookies.account + '，体验币不足！Exp：'+exp)
                 cookies.warn = state
                 db.session.commit()
         elif 600 == result:
@@ -80,14 +80,8 @@ def exchange_task(cookies, wecom_list):
 
 def CheckWZRY():
     from lxml import etree
-    headers_User_Agent = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:100.0) Gecko/20100101 Firefox/100.0',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-        'Accept-Language': 'zh-CN,en-US;q=0.7,en;q=0.3',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive',
-    }
-    URL = 'https://apps.game.qq.com/cmc/cross?serviceId=18&filter=channel&sortby=sIdxTime&source=web_pc&limit=12&logic=or&typeids=1&chanid=1762&start=0&withtop=yes&exclusiveChannel=4&exclusiveChannelSign=76528c167dacd68a55d46c72bbe31b68&time=1679568000'
+    headers_User_Agent = ArgumentsModel.query.filter_by(name='check_header').first().value
+    URL = ArgumentsModel.query.filter_by(name='check_url').first().value
     try:
         response = requests.get(url=URL, headers=headers_User_Agent)
         if response.status_code == 200:
@@ -100,7 +94,7 @@ def CheckWZRY():
                 tUrl = 'https://pvp.qq.com/cp/a20161115tyf/detail.shtml?tid=' + str(tid)
                 update_list = UpdateLogModel.query.filter_by(update_id=tid).all()
                 if len(update_list) < 1:
-                    update_log_model = UpdateLogModel(update_date=sCreated, update_id=tid)
+                    update_log_model = UpdateLogModel(update_date=sCreated, update_id=tid, url=tUrl)
                     db.session.add(update_log_model)
                     db.session.commit()
                     URL = 'https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?p0=18&source=web_pc&id=' + str(tid)
@@ -172,9 +166,9 @@ def find_last_keyword_position(s):
 
 def get_exp(account):
     cookies = CookiesModel.query.filter_by(account=account).first()
-    url = 'https://smoba.ams.game.qq.com/ams/ame/amesvr?ameVersion=0.3&sServiceType=yxzjtest&iActivityId=126433&sServiceDepartment=group_b&sSDID=cc1ddbcfd6e307471b5e73e28c6ff10c&sMiloTag=AMS-MILO-126433-407548-7FC45CD9C1C78D9600CFA1A9EDC2312D-1724830023673-q4rB4x&isXhrPost=true'
     headers = cookies.headers
-    data = cookies.data1
+    url = ArgumentsModel.query.filter_by(name='exp_url').first().value
+    data = ArgumentsModel.query.filter_by(name='exp_data').first().value
     try:
         response = requests.post(url=url, headers=eval(headers), data=eval(data))
         json_data = json.loads(response.text)

@@ -37,4 +37,12 @@ class UpdateLogModel(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     update_date = db.Column(db.String(100))
     update_id = db.Column(db.String(100))
+    url = db.Column(db.String(100))
     create_date = db.Column(db.DateTime, default=datetime.now)
+
+
+class ArgumentsModel(db.Model):
+    __tablename__ = "arguments"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(100))
+    value = db.Column(db.String(100))
