@@ -11,7 +11,6 @@ class CookiesModel(db.Model):
     url = db.Column(db.String(2000), nullable=False)
     headers = db.Column(db.String(20000), nullable=False)
     data = db.Column(db.String(20000), nullable=False)
-    data1 = db.Column(db.String(20000), nullable=False)
     Notifications = db.Column(db.Integer)
     contact = db.Column(db.String(100))
     type = db.Column(db.Integer)

@@ -28,8 +28,8 @@ def CheckWZRY():
                     db.session.commit()
                     URL = 'https://apps.game.qq.com/wmp/v3.1/public/searchNews.php?p0=18&source=web_pc&id=' + str(tid)
                     response = requests.get(url=URL, headers=headers_User_Agent)
-                    data1 = json.loads(response.text[14:-1])['msg']['sContent']
-                    data = etree.HTML(text=data1)
+                    sContent = json.loads(response.text[14:-1])['msg']['sContent']
+                    data = etree.HTML(text=sContent)
                     result = data.xpath('string(.)')
                     sc_send('体验服又更新啦！', result)
                     msgList = []
