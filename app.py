@@ -1,7 +1,8 @@
 from flask import Flask, redirect, url_for
 from flask_apscheduler import APScheduler
 
-from blueprints.exchange import SkinDebris, CheckWZRY
+from blueprints.exchange import CheckWZRY
+from blueprints.index import SkinDebris
 from utils.utils import send_to_wecom
 from blueprints import index_bp, search_bp
 from config.exts import db
