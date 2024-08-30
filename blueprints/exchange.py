@@ -9,10 +9,10 @@ import re
 
 def CheckWZRY():
     from lxml import etree
-    headers_User_Agent = ArgumentsModel.query.filter_by(name='check_header').first().value
+    headers_User_Agent = eval(ArgumentsModel.query.filter_by(name='check_header').first().value)
     URL = ArgumentsModel.query.filter_by(name='check_url').first().value
     try:
-        response = requests.get(url=URL, headers=eval(headers_User_Agent))
+        response = requests.get(url=URL, headers=headers_User_Agent)
         if response.status_code == 200:
             json_data = json.loads(response.text)
             data = json_data['data']['items'][0]
