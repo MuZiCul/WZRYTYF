@@ -1,3 +1,4 @@
+import ast
 import json
 import re
 from datetime import datetime
@@ -211,12 +212,17 @@ def test():
 def request_(account, url, headers, data):
     try:
         exp, expscore = get_exp(account)
-        response = requests.post(url=url, headers=eval(headers), data=eval(data))
+        if isinstance(headers, str):
+            headers = ast.literal_eval(headers)
+        if isinstance(data, str):
+            data = ast.literal_eval(data)
+        response = requests.post(url=url, headers=headers, data=data)
         json_data = json.loads(response.text)
         result = json.loads(response.text).get('ret')
         return int(result), json_data, exp
     except Exception as e:
-        send_to_wecom('体验服服务器异常，请检查！\n当前时间：' + str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + '\n错误详情：' + str(e))
+        send_to_wecom('体验服服务器异常，请检查！\n当前时间：' + str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + '\n错误详情：' + str(
+            e) + '\n错误位置：request_()')
         return 404, None, None
 
 
@@ -226,12 +232,20 @@ def get_exp(account):
     url = ArgumentsModel.query.filter_by(name='exp_url').first().value
     data = ArgumentsModel.query.filter_by(name='exp_data').first().value
     try:
-        response = requests.post(url=url, headers=eval(headers), data=eval(data))
+        if isinstance(headers, str):
+            headers = ast.literal_eval(headers)
+        if isinstance(data, str):
+            data = ast.literal_eval(data)
+        response = requests.post(url=url, headers=headers, data=data)
         json_data = json.loads(response.text)
+        if json_data.get('ret') == '101':
+            return -1, -1
         exp_voucher = json_data.get('modRet').get('jData').get('exp_voucher')
         expscore = json_data.get('modRet').get('jData').get('expscore')
         return exp_voucher, expscore
     except Exception as e:
+        send_to_wecom('体验服服务器异常，请检查！\n当前时间：' + str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + '\n错误详情：' + str(
+            e) + '\n错误位置：get_exp()')
         return -1, -1
 
 
@@ -246,7 +260,7 @@ def SkinDebris():
     if len(wecom_list) > 0:
         for index, wecom in enumerate(wecom_list):
             wecom_msg += f'A{index}：{wecom}\n'
-        send_to_wecom('Time：'+today+'\n'+wecom_msg)
+        send_to_wecom('Time：' + today + '\n' + wecom_msg)
 
 
 def exchange_task(cookies, wecom_list):
@@ -259,12 +273,12 @@ def exchange_task(cookies, wecom_list):
             updateCookiesStates(cookies.account, state, warn=0)
             cookies.warn = state
             db.session.commit()
-            wecom_list.append(cookies.account + '，Success！Exp：'+exp)
+            wecom_list.append(cookies.account + '，Success！Exp：' + exp)
         elif 101 == result:
             state = COOKIES_STATE_OVERDUE
             if cookies.warn < 3:
                 updateCookiesLog(cookies.account, cookies.type, cookies.remarks, state, exp)
-                updateCookiesStates(cookies.account, state, warn=cookies.warn+1)
+                updateCookiesStates(cookies.account, state, warn=cookies.warn + 1)
                 cookies.warn = state
                 db.session.commit()
                 wecom_list.append(cookies.account + '，cookies过期！')
@@ -273,15 +287,15 @@ def exchange_task(cookies, wecom_list):
             if cookies.states != state:
                 updateCookiesLog(cookies.account, cookies.type, cookies.remarks, state, exp)
                 updateCookiesStates(cookies.account, state, warn=0)
-                wecom_list.append(cookies.account + '，礼物兑完！Exp：'+exp)
+                wecom_list.append(cookies.account + '，礼物兑完！Exp：' + exp)
                 cookies.warn = state
                 db.session.commit()
         elif '体验币不足' in str(json_data):
             state = COOKIES_STATE_DEFICIT
             if cookies.warn < 3:
                 updateCookiesLog(cookies.account, cookies.type, cookies.remarks, state, exp)
-                updateCookiesStates(cookies.account, state, warn=cookies.warn+1)
-                wecom_list.append(cookies.account + '，体验币不足！Exp：'+exp)
+                updateCookiesStates(cookies.account, state, warn=cookies.warn + 1)
+                wecom_list.append(cookies.account + '，体验币不足！Exp：' + exp)
                 cookies.warn = state
                 db.session.commit()
         elif 600 == result:
