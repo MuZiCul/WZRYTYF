@@ -114,27 +114,34 @@ def curl2py(curl, wx, remarks):
                 if '获得了礼包' in str(json_data):
                     state = COOKIES_STATE_SUCCESS
                     msg = add_cookies(qq, account, type_, url, headers, data_dict, remarks, state, exp) + \
-                          '，今日兑换成功！'
+                          '今日兑换成功！'
                     updateCookiesStates(account, state, warn=0)
                     updateCookiesLog(account, type_, remarks, state, exp)
                     code = 200
                 elif '兑换一次' in str(json_data):
                     state = COOKIES_STATE_SUCCESS
                     msg = add_cookies(qq, account, type_, url, headers, data_dict, remarks, state, exp) + \
-                          '，今日已兑换！'
+                          '今日已兑换！'
                     updateCookiesStates(account, state, warn=0)
                     code = 200
                 elif '体验币不足' in str(json_data):
                     state = COOKIES_STATE_DEFICIT
                     msg = add_cookies(qq, account, type_, url, headers, data_dict, remarks, state, exp) + \
-                          '，账号体验币不足！'
+                          '体验币不足！'
                     updateCookiesStates(account, state, warn=0)
                     updateCookiesLog(account, type_, remarks, state, exp)
                     code = 200
                 elif '已发放完' in str(json_data):
                     state = COOKIES_STATE_ENDED
                     msg = add_cookies(qq, account, type_, url, headers, data_dict, remarks, state, exp) + \
-                          '，今日皮肤碎片礼品已发放完！'
+                          '皮肤碎片礼品已发放完！'
+                    updateCookiesStates(account, state, warn=0)
+                    updateCookiesLog(account, type_, remarks, state, exp)
+                    code = 200
+                elif '补货' in str(json_data):
+                    state = COOKIES_STATE_ENDED
+                    msg = add_cookies(qq, account, type_, url, headers, data_dict, remarks, state, exp) + \
+                          '礼包不够咯，客服补货中~'
                     updateCookiesStates(account, state, warn=0)
                     updateCookiesLog(account, type_, remarks, state, exp)
                     code = 200
