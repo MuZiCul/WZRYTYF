@@ -4,7 +4,7 @@ import string
 
 import requests
 
-from config.config import WECOM_CID, WECOM_AID, WECOM_SECRET, WECOM_TOUID
+from config.config import WECOM_SECRET_KEY
 
 
 def getRandomLD(length):
@@ -16,8 +16,7 @@ def getRandomLD(length):
 
 
 def send_to_wecom(msg):
-    SECRET_KEY = 'j6nD4C-M9KPGFyaT4JrtbezVNZD-tFOLQHpf3Jj1bvO'
-    url = f"http://46.137.225.28:22818/message_transfer?msg={msg}&wecom_cid={WECOM_CID}&wecom_aid={WECOM_AID}&wecom_secret={WECOM_SECRET}&wecom_touid={WECOM_TOUID}&secret_key={SECRET_KEY}"
+    url = f"http://101.126.86.100:22818/send?msg={msg}&secret_key={WECOM_SECRET_KEY}&recipient=LiJinQiang"
 
     response = requests.post(url)
 

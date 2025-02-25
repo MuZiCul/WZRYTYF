@@ -216,6 +216,12 @@ def test():
     return render_template('search.html', qq='898621235')
 
 
+@bp.route('/test_info', methods=['GET', 'POST'])
+def test_info():
+    send_to_wecom('消息测试')
+    return render_template('search.html', qq='898621235')
+
+
 def request_(account, url, headers, data):
     try:
         exp, expscore = get_exp(account)
@@ -228,7 +234,8 @@ def request_(account, url, headers, data):
         result = json.loads(response.text).get('ret')
         return int(result), json_data, exp
     except Exception as e:
-        send_to_wecom('体验服服务器异常，请检查！\n当前时间：' + str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + '\n错误详情：' + str(
+        send_to_wecom('体验服服务器异常，请检查！\n当前时间：' + str(
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + '\n错误详情：' + str(
             e) + '\n错误位置：request_()')
         return 404, None, None
 
@@ -251,7 +258,8 @@ def get_exp(account):
         expscore = json_data.get('modRet').get('jData').get('expscore')
         return exp_voucher, expscore
     except Exception as e:
-        send_to_wecom('体验服服务器异常，请检查！\n当前时间：' + str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + '\n错误详情：' + str(
+        send_to_wecom('体验服服务器异常，请检查！\n当前时间：' + str(
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + '\n错误详情：' + str(
             e) + '\n错误位置：get_exp()')
         return -1, -1
 
