@@ -1,3 +1,4 @@
+# 弃用
 # 使用官方Python 3.8镜像作为基础镜像
 FROM python:3.8-slim
 

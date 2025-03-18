@@ -1,13 +1,18 @@
-version: '1.0'
 services:
   wzry_server:
-    build: .
-    command: sh -c "ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo Asia/Shanghai > /etc/timezone && flask run --host=0.0.0.0"
+    # build: .
+    image: python:3.8-slim
+    command: sh -c "pip install -r /app/requirements.txt && flask run --host=0.0.0.0"
     container_name: wzry_server
     ports:
       - "5700:5000"
+    # 不将所有文件拷贝到容器，而是映射进去.
+    volumes:
+      - .:/app
     environment:
       TZ: Asia/Shanghai
       FLASK_APP: app.py
       FLASK_ENV: development
+      FLASK_RUN_HOST: 0.0.0.0
+    working_dir: /app
 
