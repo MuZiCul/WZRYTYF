@@ -1,0 +1,11 @@
+Flask==2.1.2
+flask_apscheduler==1.12.4
+flask_mail==0.9.1
+flask_migrate==3.1.0
+flask_sqlalchemy==2.5.1
+geoip2==4.5.0
+lxml==4.9.0
+pycryptodome==3.14.1
+Requests==2.27.1
+SQLAlchemy==1.4.36
+Werkzeug==2.1.2
