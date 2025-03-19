@@ -1,9 +1,11 @@
 # 数据库配置信息
 import json
+import os
 from flask_apscheduler.auth import HTTPBasicAuth
 
 # 读取secret.json文件
-with open('secret.json', 'r') as f:
+secret_json_path = os.path.join(os.path.dirname(__file__), 'secret.json')
+with open(secret_json_path, 'r') as f:
     secret_config = json.load(f)
 
 HOSTNAME = secret_config['HOSTNAME']
