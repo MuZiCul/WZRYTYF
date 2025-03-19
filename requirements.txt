@@ -9,3 +9,4 @@ pycryptodome==3.14.1
 Requests==2.27.1
 SQLAlchemy==1.4.36
 Werkzeug==2.1.2
+PyMySQL==1.0.2
