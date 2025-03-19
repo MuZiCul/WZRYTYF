@@ -59,10 +59,10 @@ COOKIES_STATE_ENDED = 808  # 发完
 TYPE_WX = 201
 TYPE_QQ = 202
 
-#server酱Key
+# server酱Key
 server_key = secret_config['SERVER_KEY']
 
-#secret.json格式如下：
+# secret.json格式如下：
 # {
 #     "HOSTNAME": "",
 #     "PORT": "",
