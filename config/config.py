@@ -61,3 +61,37 @@ TYPE_QQ = 202
 
 #server酱Key
 server_key = secret_config['SERVER_KEY']
+
+
+
+#secret.json格式如下：
+# {
+#     "HOSTNAME": "",
+#     "PORT": "",
+#     "DATABASE": "",
+#     "USERNAME": "",
+#     "PASSWORD": "",
+#     "REDIS_HOST": "",
+#     "REDIS_PORT": "",
+#     "REDIS_PASSWORD": "",
+#     "SECRET_KEY": "",
+#     "SCHEDULER_API_PREFIX": "",
+#     "MAIL_SERVER": "",
+#     "MAIL_PORT": "",
+#     "MAIL_USE_TLS": false,
+#     "MAIL_USE_SSL": true,
+#     "MAIL_DEBUG": true,
+#     "MAIL_USERNAME": "",
+#     "MAIL_PASSWORD": "",
+#     "MAIL_DEFAULT_SENDER": "",
+#     "WECOM_CID": "",
+#     "WECOM_AID": "",
+#     "WECOM_SECRET": "",
+#     "WECOM_TOUID": "",
+#     "WECOM_IP": "",
+#     "WECOM_PORT": "",
+#     "WECOM_INTERFACE": "",
+#     "WECOM_RECIPIENT": "",
+#     "WECOM_SECRET_KEY": "",
+#     "SERVER_KEY": ""
+# }
