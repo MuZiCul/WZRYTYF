@@ -62,8 +62,6 @@ TYPE_QQ = 202
 #server酱Key
 server_key = secret_config['SERVER_KEY']
 
-
-
 #secret.json格式如下：
 # {
 #     "HOSTNAME": "",
